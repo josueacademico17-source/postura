@@ -13,6 +13,16 @@ export class InteractionSystem {
   }
 
   update() {
+    if (
+      !this.hud.state?.gameStarted ||
+      this.hud.state.shopOpen ||
+      this.hud.state.ergoOpen ||
+      this.hud.state.statsOpen ||
+      this.hud.state.tutorialOpen
+    ) {
+      this.hud.hideHint();
+      return;
+    }
     this.current = this.pickWorker(5);
     if (this.current) {
       this.hud.showHint(`[E] Hablar con ${this.current.userData.npcData.name}`);

@@ -84,13 +84,20 @@ export class InspectionPanel {
     }
 
     const targetId = this.select.value;
+    const healthyBefore = this.workerManager.data.filter((worker) => worker.healthy).length;
     this.workerManager.applyEffects(targetId, item.effects);
     this.state.totalPurchases += 1;
     const productivity = this.productivitySystem.recalculate();
+    const healthyAfter = this.workerManager.data.filter((worker) => worker.healthy).length;
+    if (healthyAfter > healthyBefore) {
+      this.eventBus.emit('workers:healthyChanged', healthyAfter);
+    }
     this.state.transformLevel = Math.min(100, this.state.transformLevel + 8);
     this.eventBus.emit('transform:changed', this.state.transformLevel);
     this.eventBus.emit('purchase:completed', { item, targetId, productivity });
-    this.notifications.show(`${item.name} adquirido correctamente.`, 'success');
+    this.eventBus.emit('ergopoints:award', { amount: 25, reason: 'Compra ergonomica' });
+    const targetName = targetId === 'all' ? 'toda la oficina' : this.workerManager.findById(targetId)?.data.name;
+    this.notifications.show(`✓ ${item.name} adquirido para ${targetName}.`, 'success');
     this.close();
   }
 }

@@ -19,6 +19,7 @@ export class InputManager {
     if (code === 'KeyQ') this.eventBus.emit('input:scanner');
     if (code === 'KeyB') this.eventBus.emit('input:shop');
     if (code === 'KeyE') this.eventBus.emit('input:interact');
+    if (code === 'KeyR') this.eventBus.emit('input:ergo');
     if (code === 'KeyT') this.eventBus.emit('input:report');
     if (code === 'Escape') this.eventBus.emit('input:escape');
   }

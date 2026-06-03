@@ -6,12 +6,13 @@ import { ScannerEffects } from './ScannerEffects.js';
 import { ScannerOverlay } from './ScannerOverlay.js';
 
 export class ErgonomicScanner {
-  constructor(state, camera, scene, workerManager, eventBus, inspectionPanel, notifications) {
+  constructor(state, camera, scene, workerManager, eventBus, inspectionPanel, notifications, soundManager) {
     this.state = state;
     this.camera = camera;
     this.workerManager = workerManager;
     this.eventBus = eventBus;
     this.notifications = notifications;
+    this.soundManager = soundManager;
     this.overlay = new ScannerOverlay(state, inspectionPanel);
     this.effects = new ScannerEffects(scene);
     this.posture = new PostureSystem();
@@ -35,6 +36,7 @@ export class ErgonomicScanner {
     this.overlay.setActive(this.state.scannerActive);
     if (this.state.scannerActive) {
       this.notifications.show('Escaner postural activado. Apunta a un empleado.', 'info');
+      this.soundManager?.playScanner();
       return;
     }
     this.lastScannedId = null;
@@ -51,7 +53,7 @@ export class ErgonomicScanner {
         this.effects.clear();
         this.overlay.emptyDiagnostic();
         this.overlay.hideWorkerCard();
-        this.overlay.status.textContent = 'ESCANER: ACTIVO';
+        this.overlay.status.textContent = 'ESCÁNER: ACTIVO';
       }
       return;
     }
@@ -67,9 +69,12 @@ export class ErgonomicScanner {
     const evaluation = this.posture.evaluate(worker.data);
     if (worker.data.id !== this.lastScannedId) {
       this.lastScannedId = worker.data.id;
+      const firstScan = !this.state.scannedNPCs.has(worker.data.id);
       this.state.scannedNPCs.add(worker.data.id);
       this.effects.highlight(worker);
-      this.eventBus.emit('scanner:scanned', worker.data);
+      if (firstScan) this.eventBus.emit('scanner:scanned', worker.data);
+      if (worker.data.healthy) this.soundManager?.playGoodPosture();
+      else this.soundManager?.playBadPosture();
     }
     this.overlay.showWorker(worker, evaluation);
   }

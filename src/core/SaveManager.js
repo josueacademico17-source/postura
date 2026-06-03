@@ -21,6 +21,8 @@ export class SaveManager {
           productivity: state.productivity,
           transformLevel: state.transformLevel,
           totalPurchases: state.totalPurchases,
+          totalSpent: state.totalSpent,
+          ergoPuntos: state.ergoPuntos,
           scannedNPCs: Array.from(state.scannedNPCs),
         }),
       );

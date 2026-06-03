@@ -27,6 +27,7 @@
     linear-gradient(90deg, rgba(0, 212, 200, 0.055) 1px, transparent 1px);
   background-size: 40px 40px;
   mask-image: radial-gradient(circle at center, #000 48%, transparent 82%);
+  animation: gridScroll 8s linear infinite;
 }
 
 .scan-sweep {
@@ -38,6 +39,15 @@
   background: linear-gradient(180deg, transparent, rgba(0, 212, 200, 0.17), transparent);
   filter: blur(2px);
   animation: scan-sweep 2.2s linear infinite;
+}
+
+@keyframes gridScroll {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 40px 40px;
+  }
 }
 
 .scan-corners {

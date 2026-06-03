@@ -7,7 +7,7 @@
       name="description"
       content="Inspector Postural: simulador 3D de inspección ergonómica corporativa."
     />
-    <title>Inspector Postural - La Empresa en Crisis</title>
+    <title>Inspector Postural v3 - La Empresa en Crisis</title>
     <link rel="stylesheet" href="/styles/main.css" />
     <link rel="stylesheet" href="/styles/hud.css" />
     <link rel="stylesheet" href="/styles/panels.css" />
@@ -16,34 +16,44 @@
   </head>
   <body>
     <div id="splash">
-      <div class="splash-logo" aria-hidden="true">IP</div>
+      <div class="splash-uni-logo">
+        <img src="/logo-universidad.png" alt="Universidad" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="splash-uni-fallback" style="display:none">UNIVERSIDAD</div>
+      </div>
+      <div class="splash-logo" aria-hidden="true">🔍</div>
       <div class="splash-title">INSPECTOR POSTURAL</div>
-      <div class="splash-sub">LA EMPRESA EN CRISIS</div>
+      <div class="splash-sub">LA EMPRESA EN CRISIS · v3 REMASTER</div>
       <div class="splash-mission">
-        Eres un consultor ergonómico. <strong>5 empleados</strong> sufren dolores posturales que destruyen la productividad de la empresa.<br />
-        Usa el escáner, diagnostica y actúa antes de que sea demasiado tarde.
+        Eres un <strong>consultor ergonómico</strong>. Cinco empleados sufren dolores posturales que destruyen la productividad.<br />
+        Diagnostica, actúa y transforma la empresa antes de que sea demasiado tarde.
       </div>
       <div class="bar-wrap"><div class="bar-fill" id="load-bar"></div></div>
       <div id="load-text">INICIALIZANDO SISTEMAS...</div>
-      <button class="start-btn" id="start-btn" type="button">COMENZAR MISIÓN</button>
+      <button class="start-btn" id="start-btn" type="button">▶&nbsp;&nbsp;COMENZAR MISIÓN</button>
     </div>
 
     <canvas id="canvas" aria-label="Inspector postural 3D"></canvas>
 
     <div id="click-overlay" class="hidden">
       <div class="click-msg">
-        <div class="play-icon" aria-hidden="true">SCAN</div>
+        <div class="play-icon" aria-hidden="true">🔍</div>
         <h3>INSPECTOR POSTURAL</h3>
-        <p>Haz clic para activar los controles FPS</p>
+        <p>Haz clic para activar los controles</p>
       </div>
     </div>
 
     <div id="hud">
       <div id="transform-bar"><div id="transform-fill"></div></div>
 
+      <div id="health-bar-wrap">
+        <div class="health-label">SALUD ERGONÓMICA EMPRESARIAL</div>
+        <div class="health-track"><div id="health-fill"></div></div>
+      </div>
+
       <section id="budget-panel" aria-live="polite">
         <div class="hud-label">PRESUPUESTO</div>
-        <div class="hud-value" id="budget-val">5.000 EUR</div>
+        <div class="hud-value" id="budget-val">5.000 €</div>
+        <div class="hud-sub">⭐ <span id="ergo-pts">0</span> ErgoPuntos</div>
       </section>
 
       <section id="prod-panel" aria-live="polite">
@@ -58,16 +68,15 @@
       <div id="scanner-overlay">
         <div class="scan-vignette"></div>
         <div class="scan-grid"></div>
-        <div class="scan-sweep"></div>
         <div class="scan-corners"></div>
-        <div id="scanner-status">ESCANER: INACTIVO</div>
+        <div id="scanner-status">ESCÁNER: INACTIVO</div>
         <div class="scanner-reticle">
           <span></span><span></span><span></span><span></span>
         </div>
       </div>
 
       <section id="diagnostic">
-        <div class="diag-title">ANALISIS POSTURAL</div>
+        <div class="diag-title">ANÁLISIS POSTURAL</div>
         <div class="diag-row">
           <div class="diag-icon ok" id="d-neck-icon">--</div>
           <div class="diag-label">Cuello</div>
@@ -80,7 +89,7 @@
         </div>
         <div class="diag-row">
           <div class="diag-icon ok" id="d-wrist-icon">--</div>
-          <div class="diag-label">Munecas</div>
+          <div class="diag-label">Muñecas</div>
           <div class="diag-angle ok" id="d-wrist-val">-</div>
         </div>
         <div class="diag-row">
@@ -88,7 +97,7 @@
           <div class="diag-label">Horas sentado</div>
           <div class="diag-angle ok" id="d-hours-val">-</div>
         </div>
-        <div class="diag-severity sev-none" id="d-severity">SIN PROBLEMAS</div>
+        <div class="diag-severity sev-none" id="d-severity">APUNTA A UN EMPLEADO</div>
       </section>
 
       <section id="npc-card">
@@ -104,15 +113,26 @@
 
       <div id="email-notif"></div>
       <div id="notif-area"></div>
+      <div id="achievement-area"></div>
+
+      <div id="minimap-wrap">
+        <div class="map-label">MAPA DE PLANTA</div>
+        <canvas id="minimap" width="160" height="160"></canvas>
+      </div>
+
+      <div id="uni-logo-hud">
+        <img src="/logo-universidad.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+        <div class="uni-text" style="display:none">UNIVERSIDAD</div>
+      </div>
 
       <div id="controls">
-        <span class="ctrl-key">W</span><span class="ctrl-desc">Frente</span>
-        <span class="ctrl-key">A</span><span class="ctrl-desc">Izq.</span>
-        <span class="ctrl-key">S</span><span class="ctrl-desc">Atras</span>
-        <span class="ctrl-key">D</span><span class="ctrl-desc">Der.</span>
-        <span class="ctrl-key">Q</span><span class="ctrl-desc">Escaner</span>
+        <span class="ctrl-key">WASD</span><span class="ctrl-desc">Mover</span>
+        <span class="ctrl-key">Q</span><span class="ctrl-desc">Escáner</span>
         <span class="ctrl-key">E</span><span class="ctrl-desc">Hablar</span>
         <span class="ctrl-key">B</span><span class="ctrl-desc">Tienda</span>
+        <span class="ctrl-key">R</span><span class="ctrl-desc">Ergonomía</span>
+        <span class="ctrl-key">T</span><span class="ctrl-desc">Stats</span>
+        <span class="ctrl-key">ESC</span><span class="ctrl-desc">Menú</span>
       </div>
 
       <div id="dpad">
@@ -128,7 +148,7 @@
           <button class="dpad-btn" id="btn-s" data-key="KeyS" type="button"><span class="dpad-arrow">▼</span><span class="dpad-label">S</span></button>
         </div>
         <div class="dpad-action-row">
-          <button class="dpad-action-btn" id="btn-q" data-key="KeyQ" type="button"><span>Q</span> Escaner</button>
+          <button class="dpad-action-btn" id="btn-q" data-key="KeyQ" type="button"><span>Q</span> Escáner</button>
           <button class="dpad-action-btn" id="btn-e" data-key="KeyE" type="button"><span>E</span> Hablar</button>
           <button class="dpad-action-btn" id="btn-b" data-key="KeyB" type="button"><span>B</span> Tienda</button>
         </div>
@@ -138,8 +158,8 @@
     <div id="shop">
       <div class="shop-panel">
         <div class="shop-head">
-          <h2>TIENDA ERGONOMICA</h2>
-          <button class="close-btn" id="shop-close" type="button">x</button>
+          <h2>🛒 TIENDA ERGONÓMICA</h2>
+          <button class="close-btn" id="shop-close" type="button">✕</button>
         </div>
         <div class="shop-npc-sel">
           <label for="shop-npc-sel">DESTINAR A EMPLEADO</label>
@@ -150,6 +170,135 @@
         <div class="shop-items" id="shop-items-list"></div>
       </div>
     </div>
+
+    <div id="ergo-panel">
+      <button class="ergo-close-btn" id="ergo-close" type="button">✕ CERRAR [R]</button>
+      <div class="ergo-container">
+        <div class="ergo-header">
+          <h1>🏋️ GUÍA ERGONÓMICA PROFESIONAL</h1>
+          <p>BASADO EN NORMATIVAS OIT · ISO 9241 · MÉTODO REBA</p>
+        </div>
+        <div class="ergo-grid">
+          <article class="ergo-card">
+            <div class="ergo-card-icon">✅</div>
+            <h3>La postura correcta</h3>
+            <ul>
+              <li>Espalda recta con soporte lumbar activo.</li>
+              <li>Monitor al nivel de los ojos.</li>
+              <li>Codos a 90° o ligeramente abiertos.</li>
+              <li>Muñecas neutras al teclear.</li>
+              <li>Pies planos en el suelo o reposapiés.</li>
+            </ul>
+            <div class="ergo-angles">
+              <div class="angle-item"><div class="angle-num">0-15°</div><div class="angle-label">Cuello</div></div>
+              <div class="angle-item"><div class="angle-num">0-10°</div><div class="angle-label">Columna</div></div>
+              <div class="angle-item"><div class="angle-num">0-10°</div><div class="angle-label">Muñecas</div></div>
+              <div class="angle-item"><div class="angle-num">90°</div><div class="angle-label">Codos</div></div>
+            </div>
+          </article>
+          <article class="ergo-card">
+            <div class="ergo-card-icon">⚠️</div>
+            <h3>Riesgos de malas posturas</h3>
+            <ul>
+              <li>Lumbalgia crónica y bajas laborales.</li>
+              <li>Síndrome del túnel carpiano.</li>
+              <li>Tendinitis de hombros y codos.</li>
+              <li>Migrañas cervicogénicas.</li>
+              <li>Fatiga visual y mental.</li>
+            </ul>
+          </article>
+          <article class="ergo-card">
+            <div class="ergo-card-icon">🛠️</div>
+            <h3>Soluciones ergonómicas</h3>
+            <ul>
+              <li>Silla ergonómica con soporte lumbar.</li>
+              <li>Soporte de monitor a nivel ocular.</li>
+              <li>Reposamuñecas y teclado alineado.</li>
+              <li>Mesa elevable y pausas activas.</li>
+              <li>Iluminación LED sin reflejos.</li>
+            </ul>
+          </article>
+          <article class="ergo-card">
+            <div class="ergo-card-icon">📊</div>
+            <h3>Datos OIT y OMS</h3>
+            <div class="ergo-stats">
+              <div class="estat"><div class="estat-num">80%</div><div class="estat-desc">sufre dolor lumbar alguna vez.</div></div>
+              <div class="estat"><div class="estat-num">4:1</div><div class="estat-desc">retorno de inversión ergonómica.</div></div>
+              <div class="estat"><div class="estat-num">40%</div><div class="estat-desc">menos fatiga con pausas activas.</div></div>
+            </div>
+          </article>
+          <article class="ergo-card full">
+            <div class="ergo-card-icon">📋</div>
+            <h3>Checklist postural diario</h3>
+            <div class="ergo-checklist">
+              <div class="check-item"><input type="checkbox" id="c1" /><label for="c1">¿Tu silla tiene soporte lumbar?</label></div>
+              <div class="check-item"><input type="checkbox" id="c2" /><label for="c2">¿Tus pies tocan el suelo?</label></div>
+              <div class="check-item"><input type="checkbox" id="c3" /><label for="c3">¿El monitor está a la altura de tus ojos?</label></div>
+              <div class="check-item"><input type="checkbox" id="c4" /><label for="c4">¿Tus muñecas están rectas?</label></div>
+              <div class="check-item"><input type="checkbox" id="c5" /><label for="c5">¿Tu espalda está apoyada?</label></div>
+              <div class="check-item"><input type="checkbox" id="c6" /><label for="c6">¿Hiciste una pausa activa?</label></div>
+            </div>
+          </article>
+          <article class="ergo-card full">
+            <div class="ergo-card-icon">⌚</div>
+            <h3>Pausas activas cada 2 horas</h3>
+            <div class="exercise-grid">
+              <div class="exercise"><div class="exercise-icon">🔄</div><h4>Rotación cervical</h4><p>Gira la cabeza lentamente. 10 repeticiones.</p></div>
+              <div class="exercise"><div class="exercise-icon">🤸</div><h4>Hombros</h4><p>Entrelaza dedos y estira brazos 20 segundos.</p></div>
+              <div class="exercise"><div class="exercise-icon">✊</div><h4>Muñecas</h4><p>Abre y cierra puños. 15 repeticiones.</p></div>
+              <div class="exercise"><div class="exercise-icon">🧘</div><h4>Respiración</h4><p>Inhala 4s, mantén 2s, exhala 6s.</p></div>
+              <div class="exercise"><div class="exercise-icon">🦵</div><h4>Piernas</h4><p>Eleva rodillas alternadamente 20 veces.</p></div>
+              <div class="exercise"><div class="exercise-icon">👁️</div><h4>20-20-20</h4><p>Mira a 6m durante 20 segundos.</p></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div id="stats-panel">
+      <div class="stats-container">
+        <button class="stats-close" id="stats-close" type="button">✕ CERRAR [T]</button>
+        <div class="stats-header">
+          <h2>📊 ESTADÍSTICAS DE MISIÓN</h2>
+          <p>INFORME EN TIEMPO REAL</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="sval" id="st-time">00:00</div><div class="slabel">Tiempo jugado</div></div>
+          <div class="stat-card"><div class="sval" id="st-scanned">0/5</div><div class="slabel">NPCs escaneados</div></div>
+          <div class="stat-card"><div class="sval" id="st-spent">0 €</div><div class="slabel">Total invertido</div></div>
+          <div class="stat-card"><div class="sval" id="st-pts">0</div><div class="slabel">ErgoPuntos</div></div>
+        </div>
+        <div class="stats-section">
+          <div class="hud-label">ESTADO DE EMPLEADOS</div>
+          <div class="npc-status-list" id="npc-status-list"></div>
+        </div>
+        <div class="stats-section">
+          <div class="hud-label">LOGROS DESBLOQUEADOS</div>
+          <div class="achievement-list" id="achievement-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tutorial">
+      <div class="tutorial-box">
+        <div class="tutorial-icon">🔍</div>
+        <h2>BIENVENIDO, INSPECTOR</h2>
+        <p>Eres un consultor ergonómico contratado para salvar la empresa. Diagnostica empleados, compra soluciones y eleva la productividad al 100%.</p>
+        <div class="tut-keys">
+          <div class="tut-key"><span class="key">WASD</span><p>Desplazarte por la oficina</p></div>
+          <div class="tut-key"><span class="key">MOUSE</span><p>Girar la cámara</p></div>
+          <div class="tut-key"><span class="key">Q</span><p>Activar escáner postural</p></div>
+          <div class="tut-key"><span class="key">E</span><p>Hablar con empleados</p></div>
+          <div class="tut-key"><span class="key">B</span><p>Abrir tienda ergonómica</p></div>
+          <div class="tut-key"><span class="key">R</span><p>Guía ergonómica</p></div>
+        </div>
+        <button class="tut-btn" id="tut-start" type="button">¡COMENZAR INSPECCIÓN!</button>
+        <button class="tut-no-show" id="tut-no-show" type="button">No volver a mostrar este tutorial</button>
+      </div>
+    </div>
+
+    <div id="confetti-container"></div>
+    <div id="victory-flash"></div>
 
     <script type="module" src="/src/main.js"></script>
   </body>

@@ -24,6 +24,7 @@ export class NarrativeSystem {
       if (!shouldTrigger) return;
       this.triggered.add(event.id);
       this.notifications.email(event);
+      this.eventBus.emit('email:shown', event);
       if (event.category === 'positive' && event.triggerType === 'productivity') {
         this.budgetSystem.add(500, 'ceo_bonus');
       }

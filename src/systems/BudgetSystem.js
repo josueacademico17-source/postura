@@ -8,7 +8,9 @@ export class BudgetSystem {
   spend(amount) {
     if (this.state.budget < amount) return false;
     this.state.budget -= amount;
+    this.state.totalSpent += amount;
     this.eventBus.emit('budget:changed', this.state.budget);
+    this.eventBus.emit('budget:spent', amount);
     return true;
   }
 

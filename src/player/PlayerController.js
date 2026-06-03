@@ -16,7 +16,15 @@ export class PlayerController {
 
   update(dt) {
     this.cameraController.update();
-    if (!this.state.gameStarted || !this.cameraController.locked || this.state.shopOpen || this.state.paused) {
+    if (
+      !this.state.gameStarted ||
+      !this.cameraController.locked ||
+      this.state.shopOpen ||
+      this.state.ergoOpen ||
+      this.state.statsOpen ||
+      this.state.tutorialOpen ||
+      this.state.paused
+    ) {
       this.velocity.set(0, 0);
       return;
     }
