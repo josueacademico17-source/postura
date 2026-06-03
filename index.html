@@ -3,96 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inspector Postural v2 – La Empresa en Crisis</title>
+<title>Inspector Postural v3 – La Empresa en Crisis</title>
 <style>
+/* ── RESET ── */
 *{margin:0;padding:0;box-sizing:border-box}
 body{overflow:hidden;background:#050d14;font-family:'Segoe UI',sans-serif;user-select:none}
-canvas{display:block;width:100vw;height:100vh}
+canvas#canvas{display:block;width:100vw;height:100vh}
 
-/* ── SPLASH ─────────────────────────── */
-#splash{position:fixed;inset:0;background:linear-gradient(135deg,#050d14 0%,#0a1628 60%,#0d1f35 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:900;transition:opacity 1.2s ease}
+/* ── SPLASH ── */
+#splash{position:fixed;inset:0;background:linear-gradient(135deg,#050d14 0%,#0a1628 50%,#0d1f35 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:900;transition:opacity 1.4s ease}
 #splash.hidden{opacity:0;pointer-events:none}
-.splash-logo{width:90px;height:90px;background:linear-gradient(135deg,#00d4c8,#0088ff);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:28px;box-shadow:0 0 40px rgba(0,212,200,.35)}
-.splash-title{color:#fff;font-size:28px;font-weight:700;letter-spacing:3px;margin-bottom:6px}
-.splash-sub{color:#00d4c8;font-size:13px;letter-spacing:5px;margin-bottom:40px;opacity:.8}
-.splash-mission{background:rgba(0,212,200,.07);border:1px solid rgba(0,212,200,.2);border-radius:12px;padding:16px 28px;color:rgba(255,255,255,.75);font-size:13px;max-width:440px;text-align:center;line-height:1.7;margin-bottom:40px}
+.splash-uni-logo{width:140px;height:70px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;animation:fadeScaleIn 1s ease}
+.splash-uni-logo img{max-width:140px;max-height:70px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(0,212,200,.6))}
+.splash-uni-fallback{background:linear-gradient(135deg,#0a1628,#1a2840);border:1px solid rgba(0,212,200,.4);border-radius:10px;padding:10px 22px;color:#00d4c8;font-size:13px;font-weight:700;letter-spacing:3px;text-align:center;box-shadow:0 0 24px rgba(0,212,200,.25)}
+@keyframes fadeScaleIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
+.splash-logo{width:80px;height:80px;background:linear-gradient(135deg,#00d4c8,#0088ff);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:20px;box-shadow:0 0 50px rgba(0,212,200,.4),0 0 100px rgba(0,136,255,.2);animation:pulseGlow 3s ease infinite}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 50px rgba(0,212,200,.4),0 0 100px rgba(0,136,255,.2)}50%{box-shadow:0 0 70px rgba(0,212,200,.6),0 0 140px rgba(0,136,255,.35)}}
+.splash-title{color:#fff;font-size:26px;font-weight:800;letter-spacing:4px;margin-bottom:5px;text-shadow:0 0 30px rgba(0,212,200,.5)}
+.splash-sub{color:#00d4c8;font-size:12px;letter-spacing:6px;margin-bottom:32px;opacity:.85}
+.splash-mission{background:rgba(0,212,200,.05);border:1px solid rgba(0,212,200,.15);border-radius:14px;padding:16px 28px;color:rgba(255,255,255,.72);font-size:13px;max-width:440px;text-align:center;line-height:1.75;margin-bottom:36px;backdrop-filter:blur(5px)}
 .splash-mission strong{color:#00d4c8}
-.bar-wrap{width:320px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-bottom:10px}
-.bar-fill{height:100%;width:0;background:linear-gradient(90deg,#00d4c8,#0088ff);transition:width .25s ease;border-radius:2px}
-#load-text{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:2px;font-family:monospace}
-.start-btn{margin-top:20px;display:none;background:linear-gradient(135deg,#00d4c8,#0088ff);border:none;color:#fff;padding:14px 44px;border-radius:10px;font-size:15px;font-weight:600;letter-spacing:2px;cursor:pointer;transition:transform .15s,box-shadow .15s}
-.start-btn:hover{transform:scale(1.04);box-shadow:0 0 30px rgba(0,212,200,.5)}
+.bar-wrap{width:340px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-bottom:10px}
+.bar-fill{height:100%;width:0;background:linear-gradient(90deg,#00d4c8,#0088ff);border-radius:2px;transition:width .3s ease}
+#load-text{color:rgba(255,255,255,.38);font-size:11px;letter-spacing:3px;font-family:monospace}
+.start-btn{margin-top:22px;display:none;background:linear-gradient(135deg,#00d4c8,#0088ff);border:none;color:#fff;padding:14px 48px;border-radius:12px;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:transform .18s,box-shadow .18s}
+.start-btn:hover{transform:scale(1.05);box-shadow:0 0 40px rgba(0,212,200,.6)}
 
-/* ── HUD ───────────────────────────── */
+/* ── HUD ── */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:100}
 
+/* Transform bar */
+#transform-bar{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.05);z-index:150}
+#transform-fill{height:100%;width:0%;background:linear-gradient(90deg,#ff4444 0%,#ffaa00 40%,#00d4c8 80%,#0088ff 100%);transition:width 1s ease}
+
+/* Corporate health bar */
+#health-bar-wrap{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:280px;pointer-events:none}
+.health-label{color:rgba(255,255,255,.35);font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:3px;font-family:monospace}
+.health-track{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+#health-fill{height:100%;width:0%;background:linear-gradient(90deg,#ff3333,#ffaa00 50%,#00d4c8 100%);border-radius:3px;transition:width .8s ease}
+
 /* Budget */
-#budget-panel{position:absolute;top:18px;left:18px;background:rgba(5,13,20,.85);backdrop-filter:blur(10px);border:1px solid rgba(0,212,200,.25);border-radius:12px;padding:12px 18px;pointer-events:none}
-.hud-label{color:rgba(255,255,255,.4);font-size:10px;letter-spacing:2px;text-transform:uppercase}
-.hud-value{color:#00d4c8;font-size:22px;font-weight:700;font-family:monospace}
+#budget-panel{position:absolute;top:18px;left:18px;background:rgba(5,13,20,.88);backdrop-filter:blur(12px);border:1px solid rgba(0,212,200,.22);border-radius:14px;padding:12px 16px;pointer-events:none;min-width:150px}
+.hud-label{color:rgba(255,255,255,.38);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+.hud-value{color:#00d4c8;font-size:20px;font-weight:700;font-family:monospace;line-height:1.2}
+.hud-sub{color:rgba(255,190,0,.85);font-size:12px;font-weight:600;font-family:monospace;margin-top:3px;display:flex;align-items:center;gap:4px}
 
 /* Productivity */
-#prod-panel{position:absolute;top:18px;right:18px;background:rgba(5,13,20,.85);backdrop-filter:blur(10px);border:1px solid rgba(0,212,200,.25);border-radius:12px;padding:12px 18px;text-align:right;pointer-events:none}
-.prod-bar{width:160px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:6px;overflow:hidden}
-.prod-fill{height:100%;background:linear-gradient(90deg,#ff4444,#ffaa00,#00d4c8);border-radius:2px;transition:width .8s ease}
+#prod-panel{position:absolute;top:18px;right:18px;background:rgba(5,13,20,.88);backdrop-filter:blur(12px);border:1px solid rgba(0,212,200,.22);border-radius:14px;padding:12px 16px;text-align:right;pointer-events:none;min-width:150px}
+.prod-bar{width:150px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:6px;overflow:hidden}
+.prod-fill{height:100%;background:linear-gradient(90deg,#ff4444,#ffaa00,#00d4c8);border-radius:2px;transition:width .9s ease}
+
+/* University logo small HUD */
+#uni-logo-hud{position:absolute;bottom:50px;right:14px;opacity:.55;pointer-events:none;width:80px}
+#uni-logo-hud img{width:100%;filter:brightness(1.2) drop-shadow(0 0 6px rgba(0,212,200,.4))}
+#uni-logo-hud .uni-text{color:rgba(0,212,200,.7);font-size:8px;letter-spacing:2px;text-align:center;font-weight:600}
 
 /* Crosshair */
-#xhair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;pointer-events:none}
-#xhair::before,#xhair::after{content:'';position:absolute;background:rgba(255,255,255,.8);border-radius:1px}
-#xhair::before{width:2px;height:14px;top:5px;left:11px}
-#xhair::after{width:14px;height:2px;top:11px;left:5px}
-#xhair .dot{position:absolute;width:4px;height:4px;background:#00d4c8;border-radius:50%;top:10px;left:10px}
+#xhair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:26px;height:26px;pointer-events:none;transition:transform .1s}
+#xhair.scanning{transform:translate(-50%,-50%) scale(1.4)}
+#xhair::before,#xhair::after{content:'';position:absolute;background:rgba(255,255,255,.85);border-radius:1px}
+#xhair::before{width:2px;height:14px;top:6px;left:12px}
+#xhair::after{width:14px;height:2px;top:12px;left:6px}
+#xhair .dot{position:absolute;width:4px;height:4px;background:#00d4c8;border-radius:50%;top:11px;left:11px;box-shadow:0 0 6px #00d4c8}
 
 /* Interaction hint */
-#hint{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);backdrop-filter:blur(8px);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;border:1px solid rgba(255,255,255,.15);opacity:0;transition:opacity .3s;white-space:nowrap}
+#hint{position:absolute;bottom:88px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.78);backdrop-filter:blur(10px);color:#fff;padding:8px 22px;border-radius:22px;font-size:13px;border:1px solid rgba(255,255,255,.14);opacity:0;transition:opacity .3s;white-space:nowrap}
 #hint.visible{opacity:1}
 
 /* Controls */
-#controls{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:center}
-.ctrl-key{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;color:rgba(255,255,255,.65);font-size:11px;padding:3px 8px;font-family:monospace}
-.ctrl-desc{color:rgba(255,255,255,.35);font-size:11px}
+#controls{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.ctrl-key{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;color:rgba(255,255,255,.65);font-size:10px;padding:3px 7px;font-family:monospace}
+.ctrl-desc{color:rgba(255,255,255,.3);font-size:10px}
 
-/* Scanner HUD */
+/* Scanner overlay */
 #scanner-overlay{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;z-index:50}
 #scanner-overlay.active{opacity:1}
-.scan-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,180,255,.12) 100%)}
-.scan-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,180,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,255,.04) 1px,transparent 1px);background-size:40px 40px}
+.scan-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,180,255,.14) 100%)}
+.scan-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,180,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,255,.05) 1px,transparent 1px);background-size:40px 40px;animation:gridScroll 8s linear infinite}
+@keyframes gridScroll{from{background-position:0 0}to{background-position:40px 40px}}
 .scan-corners{position:absolute;inset:0}
-.scan-corners::before,.scan-corners::after{content:'';position:absolute;width:40px;height:40px;border-color:rgba(0,212,200,.8);border-style:solid}
-.scan-corners::before{top:20px;left:20px;border-width:3px 0 0 3px}
-.scan-corners::after{bottom:20px;right:20px;border-width:0 3px 3px 0}
-#scanner-status{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border:1px solid currentColor;border-radius:20px;padding:4px 16px;font-size:11px;letter-spacing:2px;font-family:monospace;color:rgba(255,255,255,.4)}
+.scan-corners::before,.scan-corners::after{content:'';position:absolute;width:44px;height:44px;border-color:rgba(0,212,200,.9);border-style:solid}
+.scan-corners::before{top:18px;left:18px;border-width:3px 0 0 3px}
+.scan-corners::after{bottom:18px;right:18px;border-width:0 3px 3px 0}
+#scanner-status{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.72);border:1px solid currentColor;border-radius:20px;padding:4px 18px;font-size:11px;letter-spacing:2px;font-family:monospace;color:rgba(255,255,255,.4);white-space:nowrap}
 #scanner-status.active-status{color:#00d4c8;animation:pulse-status 1.5s infinite}
-@keyframes pulse-status{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes pulse-status{0%,100%{opacity:1}50%{opacity:.45}}
 
-/* Diagnostic silhouette */
-#diagnostic{position:absolute;right:18px;top:50%;transform:translateY(-50%);background:rgba(5,13,20,.9);backdrop-filter:blur(10px);border:1px solid rgba(0,212,200,.2);border-radius:14px;padding:16px;width:190px;display:none}
+/* Diagnostic panel */
+#diagnostic{position:absolute;right:18px;top:50%;transform:translateY(-50%);background:rgba(5,13,20,.92);backdrop-filter:blur(12px);border:1px solid rgba(0,212,200,.18);border-radius:16px;padding:16px;width:195px;display:none}
 #diagnostic.visible{display:block}
-.diag-title{color:rgba(255,255,255,.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.diag-title{color:rgba(255,255,255,.45);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
 .diag-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .diag-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.diag-icon.ok{background:rgba(0,212,200,.15);border:1px solid rgba(0,212,200,.3)}
-.diag-icon.bad{background:rgba(255,60,60,.15);border:1px solid rgba(255,60,60,.3);animation:blink-bad .8s infinite}
-@keyframes blink-bad{0%,100%{opacity:1}50%{opacity:.4}}
-.diag-label{font-size:11px;color:rgba(255,255,255,.6);flex:1}
+.diag-icon.ok{background:rgba(0,212,200,.12);border:1px solid rgba(0,212,200,.28)}
+.diag-icon.bad{background:rgba(255,60,60,.12);border:1px solid rgba(255,60,60,.28);animation:blink-bad .9s infinite}
+@keyframes blink-bad{0%,100%{opacity:1}50%{opacity:.35}}
+.diag-label{font-size:11px;color:rgba(255,255,255,.58);flex:1}
 .diag-angle{font-size:10px;font-family:monospace;font-weight:700}
 .diag-angle.ok{color:#00d4c8}
 .diag-angle.bad{color:#ff4444}
-.diag-severity{margin-top:10px;padding:6px 10px;border-radius:6px;font-size:10px;letter-spacing:1px;text-align:center;font-weight:600}
-.sev-none{background:rgba(0,212,200,.1);color:#00d4c8;border:1px solid rgba(0,212,200,.2)}
-.sev-low{background:rgba(255,170,0,.1);color:#ffaa00;border:1px solid rgba(255,170,0,.2)}
-.sev-high{background:rgba(255,60,60,.1);color:#ff4444;border:1px solid rgba(255,60,60,.2)}
+.diag-severity{margin-top:10px;padding:6px 10px;border-radius:7px;font-size:10px;letter-spacing:1px;text-align:center;font-weight:600}
+.sev-none{background:rgba(0,212,200,.08);color:#00d4c8;border:1px solid rgba(0,212,200,.18)}
+.sev-low{background:rgba(255,170,0,.08);color:#ffaa00;border:1px solid rgba(255,170,0,.18)}
+.sev-high{background:rgba(255,60,60,.08);color:#ff4444;border:1px solid rgba(255,60,60,.18)}
 
 /* NPC Dialogue Card */
-#npc-card{position:absolute;left:18px;top:50%;transform:translateY(-50%);background:rgba(5,13,20,.9);backdrop-filter:blur(12px);border:1px solid rgba(0,212,200,.2);border-radius:14px;padding:18px;width:240px;display:none;opacity:0;transition:opacity .3s}
+#npc-card{position:absolute;left:18px;top:50%;transform:translateY(-50%);background:rgba(5,13,20,.93);backdrop-filter:blur(14px);border:1px solid rgba(0,212,200,.18);border-radius:16px;padding:18px;width:248px;display:none;opacity:0;transition:opacity .3s}
 #npc-card.visible{display:block;opacity:1}
-.npc-avatar{width:48px;height:48px;border-radius:50%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid rgba(0,212,200,.3)}
-.npc-name{color:#fff;font-size:14px;font-weight:600;margin-bottom:2px}
-.npc-role{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
-.npc-dialogue{color:rgba(255,255,255,.7);font-size:12px;line-height:1.6;font-style:italic;border-left:2px solid rgba(0,212,200,.3);padding-left:10px;margin-bottom:10px}
+.npc-avatar{width:50px;height:50px;border-radius:50%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid rgba(0,212,200,.3);background:rgba(0,212,200,.05)}
+.npc-name{color:#fff;font-size:14px;font-weight:700;margin-bottom:2px}
+.npc-role{color:rgba(255,255,255,.38);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.npc-dialogue{color:rgba(255,255,255,.68);font-size:12px;line-height:1.65;font-style:italic;border-left:2px solid rgba(0,212,200,.3);padding-left:10px;margin-bottom:10px}
 .npc-stats{display:flex;gap:8px}
-.stat-chip{flex:1;background:rgba(255,255,255,.05);border-radius:6px;padding:5px 8px;text-align:center}
-.stat-chip-label{font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;display:block}
+.stat-chip{flex:1;background:rgba(255,255,255,.04);border-radius:7px;padding:5px 8px;text-align:center}
+.stat-chip-label{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;display:block}
 .stat-chip-val{font-size:14px;font-weight:700;font-family:monospace}
 .stat-chip-val.red{color:#ff4444}
 .stat-chip-val.green{color:#00d4c8}
@@ -100,81 +124,176 @@ canvas{display:block;width:100vw;height:100vh}
 
 /* Email notifications */
 #email-notif{position:absolute;top:80px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
-.email-toast{background:rgba(5,13,20,.95);border:1px solid rgba(0,212,200,.3);border-radius:10px;padding:10px 18px;color:#fff;font-size:12px;max-width:380px;display:flex;gap:10px;align-items:center;animation:slideDown .4s ease,fadeOut .4s ease 4.5s forwards}
+.email-toast{background:rgba(5,13,20,.96);border:1px solid rgba(0,212,200,.28);border-radius:12px;padding:10px 18px;color:#fff;font-size:12px;max-width:400px;display:flex;gap:10px;align-items:center;animation:slideDown .4s ease,fadeOut .4s ease 4.5s forwards}
 .email-toast .email-icon{font-size:18px;flex-shrink:0}
-.email-toast .email-content strong{color:#00d4c8;display:block;font-size:11px;letter-spacing:1px}
+.email-toast .email-content strong{color:#00d4c8;display:block;font-size:10px;letter-spacing:1px}
 @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeOut{to{opacity:0;transform:translateY(-10px)}}
 
-/* Notification popups */
+/* Notifications */
 #notif-area{position:absolute;bottom:60px;right:18px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
-.notif{background:rgba(5,13,20,.92);border-left:3px solid #00d4c8;border-radius:8px;padding:10px 14px;color:rgba(255,255,255,.85);font-size:12px;max-width:280px;animation:notifIn .35s ease,notifOut .35s ease 3.5s forwards;line-height:1.5}
+.notif{background:rgba(5,13,20,.94);border-left:3px solid #00d4c8;border-radius:8px;padding:10px 14px;color:rgba(255,255,255,.85);font-size:12px;max-width:290px;animation:notifIn .35s ease,notifOut .35s ease 3.5s forwards;line-height:1.5}
 .notif.success{border-left-color:#00d4c8}
 .notif.error{border-left-color:#ff4444}
 .notif.warning{border-left-color:#ffaa00}
+.notif.info{border-left-color:#0088ff}
 @keyframes notifIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
 @keyframes notifOut{to{opacity:0;transform:translateX(30px)}}
 
+/* Achievement Popup */
+#achievement-area{position:absolute;top:90px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.achievement-popup{background:linear-gradient(135deg,rgba(5,13,20,.97),rgba(10,22,40,.97));border:1px solid rgba(255,190,0,.4);border-radius:14px;padding:12px 22px;display:flex;gap:14px;align-items:center;animation:achieveIn .5s cubic-bezier(0.34,1.56,0.64,1),achieveOut .4s ease 4.5s forwards;box-shadow:0 0 30px rgba(255,190,0,.2)}
+@keyframes achieveIn{from{opacity:0;transform:scale(0.7) translateY(-20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes achieveOut{to{opacity:0;transform:scale(0.9) translateY(-10px)}}
+.achieve-icon{font-size:32px;filter:drop-shadow(0 0 8px rgba(255,190,0,.6))}
+.achieve-text .achieve-title{color:rgba(255,190,0,.9);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.achieve-text .achieve-name{color:#fff;font-size:14px;font-weight:700;margin-top:2px}
+.achieve-text .achieve-desc{color:rgba(255,255,255,.5);font-size:11px;margin-top:2px}
+
+/* Minimap */
+#minimap-wrap{position:absolute;bottom:50px;left:18px;pointer-events:none}
+#minimap-wrap .map-label{color:rgba(0,212,200,.5);font-size:8px;letter-spacing:2px;margin-bottom:4px;font-family:monospace}
+#minimap{width:160px;height:160px;border-radius:10px;border:1px solid rgba(0,212,200,.25);box-shadow:0 0 20px rgba(0,212,200,.1)}
+
 /* Shop */
-#shop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center}
+#shop{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center}
 #shop.open{display:flex}
-.shop-panel{background:rgba(5,13,20,.97);border:1px solid rgba(0,212,200,.2);border-radius:20px;width:580px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column}
+.shop-panel{background:rgba(5,13,20,.97);border:1px solid rgba(0,212,200,.18);border-radius:22px;width:600px;max-height:87vh;overflow:hidden;display:flex;flex-direction:column}
 .shop-head{padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
-.shop-head h2{color:#fff;font-size:18px;letter-spacing:2px}
-.shop-head .close-btn{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.shop-head h2{color:#fff;font-size:17px;letter-spacing:2px}
+.shop-head .close-btn{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;pointer-events:all}
 .shop-head .close-btn:hover{background:rgba(255,60,60,.2);color:#ff4444}
 .shop-npc-sel{padding:12px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
-.shop-npc-sel label{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:1px;display:block;margin-bottom:6px}
-.shop-npc-sel select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;cursor:pointer}
+.shop-npc-sel label{color:rgba(255,255,255,.38);font-size:10px;letter-spacing:1px;display:block;margin-bottom:6px}
+.shop-npc-sel select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;cursor:pointer}
 .shop-items{padding:16px 24px;overflow-y:auto;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.shop-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:6px}
-.shop-item:hover:not(.disabled){border-color:rgba(0,212,200,.4);background:rgba(0,212,200,.06)}
-.shop-item.disabled{opacity:.4;cursor:not-allowed}
+.shop-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:6px;pointer-events:all}
+.shop-item:hover:not(.disabled){border-color:rgba(0,212,200,.38);background:rgba(0,212,200,.05);transform:translateY(-1px)}
+.shop-item.disabled{opacity:.38;cursor:not-allowed}
 .shop-item-header{display:flex;gap:10px;align-items:flex-start}
 .shop-item-icon{font-size:24px;flex-shrink:0}
 .shop-item-name{color:#fff;font-size:13px;font-weight:600}
-.shop-item-desc{color:rgba(255,255,255,.45);font-size:11px;line-height:1.4}
+.shop-item-desc{color:rgba(255,255,255,.42);font-size:11px;line-height:1.4}
 .shop-item-price{color:#00d4c8;font-size:15px;font-weight:700;font-family:monospace;margin-top:4px}
-.shop-item-effect{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.effect-tag{background:rgba(0,212,200,.08);border:1px solid rgba(0,212,200,.15);color:#00d4c8;font-size:9px;border-radius:4px;padding:2px 6px;letter-spacing:.5px}
-
-/* Email system */
-#email-panel{position:fixed;right:18px;bottom:18px;background:rgba(5,13,20,.95);border:1px solid rgba(0,212,200,.2);border-radius:14px;padding:16px;width:300px;max-height:320px;overflow-y:auto;display:none;z-index:200}
-#email-panel.open{display:block}
-.email-item{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.06);margin-bottom:8px;cursor:pointer;transition:background .2s}
-.email-item:hover{background:rgba(255,255,255,.05)}
-.email-item.unread{border-left:3px solid #00d4c8}
-.email-item-subject{color:#fff;font-size:12px;font-weight:600;margin-bottom:3px}
-.email-item-from{color:rgba(255,255,255,.4);font-size:10px}
-.email-badge{position:fixed;right:18px;bottom:18px;background:#ff4444;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;z-index:201;display:none}
-
-/* Progress bar top */
-#transform-bar{position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.05);z-index:150}
-#transform-fill{height:100%;width:0%;background:linear-gradient(90deg,#ff4444 0%,#ffaa00 40%,#00d4c8 80%,#0088ff 100%);transition:width 1s ease}
+.shop-item-effect{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.effect-tag{background:rgba(0,212,200,.07);border:1px solid rgba(0,212,200,.14);color:#00d4c8;font-size:9px;border-radius:4px;padding:2px 6px;letter-spacing:.5px}
 
 /* Pointer lock overlay */
-#click-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#click-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;display:flex;align-items:center;justify-content:center;cursor:pointer}
 #click-overlay.hidden{display:none}
-.click-msg{background:rgba(5,13,20,.9);border:1px solid rgba(0,212,200,.3);border-radius:16px;padding:30px 50px;text-align:center;color:#fff}
-.click-msg h3{font-size:20px;margin-bottom:8px;letter-spacing:2px}
-.click-msg p{color:rgba(255,255,255,.5);font-size:13px}
-.click-msg .play-icon{font-size:48px;color:#00d4c8;margin-bottom:16px}
+.click-msg{background:rgba(5,13,20,.93);border:1px solid rgba(0,212,200,.28);border-radius:18px;padding:32px 52px;text-align:center;color:#fff}
+.click-msg h3{font-size:22px;margin-bottom:8px;letter-spacing:2px}
+.click-msg p{color:rgba(255,255,255,.48);font-size:13px}
+.click-msg .play-icon{font-size:52px;color:#00d4c8;margin-bottom:18px;filter:drop-shadow(0 0 12px rgba(0,212,200,.5))}
+
+/* ── ERGONOMICS PANEL (key R) ── */
+#ergo-panel{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:600;display:none;overflow-y:auto}
+#ergo-panel.open{display:block}
+.ergo-container{max-width:860px;margin:0 auto;padding:40px 24px}
+.ergo-header{text-align:center;margin-bottom:36px}
+.ergo-header h1{color:#fff;font-size:28px;font-weight:800;letter-spacing:3px;margin-bottom:8px}
+.ergo-header p{color:rgba(0,212,200,.8);font-size:13px;letter-spacing:2px}
+.ergo-close-btn{position:fixed;top:20px;right:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;padding:8px 18px;font-size:13px;cursor:pointer;z-index:601;pointer-events:all}
+.ergo-close-btn:hover{background:rgba(255,60,60,.2);border-color:rgba(255,60,60,.4)}
+.ergo-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.ergo-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:22px}
+.ergo-card.full{grid-column:1/-1}
+.ergo-card-icon{font-size:32px;margin-bottom:12px}
+.ergo-card h3{color:#fff;font-size:16px;font-weight:700;margin-bottom:12px}
+.ergo-card p,.ergo-card li{color:rgba(255,255,255,.62);font-size:13px;line-height:1.7}
+.ergo-card ul{list-style:none;padding:0}
+.ergo-card ul li::before{content:'▸ ';color:#00d4c8}
+.ergo-angles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.angle-item{background:rgba(0,212,200,.07);border:1px solid rgba(0,212,200,.18);border-radius:10px;padding:12px;text-align:center}
+.angle-num{color:#00d4c8;font-size:22px;font-weight:800;font-family:monospace}
+.angle-label{color:rgba(255,255,255,.5);font-size:10px;letter-spacing:1px;margin-top:4px}
+.ergo-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.estat{background:rgba(255,100,0,.06);border:1px solid rgba(255,100,0,.18);border-radius:10px;padding:14px;text-align:center}
+.estat-num{color:#ffaa00;font-size:24px;font-weight:800;font-family:monospace}
+.estat-desc{color:rgba(255,255,255,.5);font-size:11px;line-height:1.5;margin-top:6px}
+.ergo-checklist{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.check-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px;cursor:pointer;transition:background .2s}
+.check-item:hover{background:rgba(0,212,200,.07)}
+.check-item input{accent-color:#00d4c8;width:16px;height:16px;cursor:pointer}
+.check-item label{color:rgba(255,255,255,.7);font-size:12px;cursor:pointer}
+.exercise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.exercise{background:rgba(0,136,255,.05);border:1px solid rgba(0,136,255,.15);border-radius:10px;padding:14px;text-align:center}
+.exercise-icon{font-size:28px;margin-bottom:6px}
+.exercise h4{color:#0088ff;font-size:12px;font-weight:700;margin-bottom:4px}
+.exercise p{color:rgba(255,255,255,.5);font-size:11px;line-height:1.5}
+
+/* ── STATS PANEL (key T) ── */
+#stats-panel{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);z-index:600;display:none;align-items:center;justify-content:center}
+#stats-panel.open{display:flex}
+.stats-container{background:rgba(5,13,20,.97);border:1px solid rgba(0,212,200,.2);border-radius:22px;padding:36px;width:520px;max-height:85vh;overflow-y:auto}
+.stats-header{text-align:center;margin-bottom:28px}
+.stats-header h2{color:#fff;font-size:20px;font-weight:800;letter-spacing:3px;margin-bottom:6px}
+.stats-header p{color:rgba(0,212,200,.6);font-size:11px;letter-spacing:2px}
+.stats-close{position:absolute;top:16px;right:16px;background:none;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:rgba(255,255,255,.5);padding:6px 14px;font-size:12px;cursor:pointer;pointer-events:all}
+.stats-close:hover{background:rgba(255,60,60,.15);color:#ff4444}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;text-align:center}
+.stat-card .sval{font-size:28px;font-weight:800;font-family:monospace;color:#00d4c8}
+.stat-card .slabel{color:rgba(255,255,255,.42);font-size:10px;letter-spacing:1px;margin-top:4px}
+.npc-status-list{margin-top:4px}
+.npc-status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:6px}
+.npc-status-name{color:rgba(255,255,255,.7);font-size:12px}
+.npc-status-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.npc-status-badge.ok{background:rgba(0,212,200,.12);color:#00d4c8;border:1px solid rgba(0,212,200,.25)}
+.npc-status-badge.bad{background:rgba(255,60,60,.12);color:#ff4444;border:1px solid rgba(255,60,60,.25)}
+.achievement-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.ach-badge{background:rgba(255,190,0,.1);border:1px solid rgba(255,190,0,.25);border-radius:8px;padding:4px 10px;color:rgba(255,190,0,.8);font-size:11px}
+.ach-badge.locked{opacity:.3;filter:grayscale(1)}
+
+/* ── TUTORIAL OVERLAY ── */
+#tutorial{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);z-index:800;display:none;align-items:center;justify-content:center}
+#tutorial.open{display:flex}
+.tutorial-box{background:rgba(5,13,20,.97);border:1px solid rgba(0,212,200,.22);border-radius:22px;padding:40px;max-width:580px;text-align:center}
+.tutorial-icon{font-size:52px;margin-bottom:18px;filter:drop-shadow(0 0 12px rgba(0,212,200,.4))}
+.tutorial-box h2{color:#fff;font-size:24px;font-weight:800;letter-spacing:2px;margin-bottom:10px}
+.tutorial-box p{color:rgba(255,255,255,.6);font-size:14px;line-height:1.7;margin-bottom:24px}
+.tut-keys{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.tut-key{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 8px;text-align:center}
+.tut-key .key{background:linear-gradient(135deg,#00d4c8,#0088ff);color:#fff;font-size:13px;font-weight:700;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:6px;font-family:monospace}
+.tut-key p{color:rgba(255,255,255,.5);font-size:11px;line-height:1.4}
+.tut-btn{background:linear-gradient(135deg,#00d4c8,#0088ff);border:none;color:#fff;padding:14px 48px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;pointer-events:all}
+.tut-btn:hover{box-shadow:0 0 30px rgba(0,212,200,.5)}
+.tut-no-show{background:none;border:none;color:rgba(255,255,255,.3);font-size:11px;cursor:pointer;margin-top:12px;display:block;width:100%;pointer-events:all}
+.tut-no-show:hover{color:rgba(255,255,255,.5)}
+
+/* ── CONFETTI ── */
+#confetti-container{position:fixed;inset:0;pointer-events:none;z-index:950;overflow:hidden}
+.confetti-piece{position:absolute;top:-20px;width:10px;height:10px;opacity:0.85;animation:confettiFall linear forwards}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ── VICTORY FLASH ── */
+#victory-flash{position:fixed;inset:0;background:#fff;pointer-events:none;opacity:0;z-index:940;transition:opacity .2s}
+#victory-flash.flash{opacity:0.7}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}
+::-webkit-scrollbar-thumb{background:rgba(0,212,200,.3);border-radius:2px}
 </style>
 </head>
 <body>
 
 <!-- SPLASH SCREEN -->
 <div id="splash">
-  <div class="splash-logo">🏢</div>
+  <div class="splash-uni-logo">
+    <img src="/logo-universidad.png" alt="Universidad" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="splash-uni-fallback" style="display:none">🎓 UNIVERSIDAD</div>
+  </div>
+  <div class="splash-logo">🔍</div>
   <div class="splash-title">INSPECTOR POSTURAL</div>
-  <div class="splash-sub">LA EMPRESA EN CRISIS</div>
+  <div class="splash-sub">LA EMPRESA EN CRISIS · v3</div>
   <div class="splash-mission">
-    Eres un consultor ergonómico. <strong>5 empleados</strong> sufren dolores posturales que destruyen la productividad de la empresa.<br>
-    Usa el escáner, diagnostica y actúa antes de que sea demasiado tarde.
+    Eres un <strong>consultor ergonómico</strong>. Cinco empleados sufren dolores posturales que destruyen la productividad.<br>
+    Diagnostica, actúa y transforma la empresa antes de que sea demasiado tarde.
   </div>
   <div class="bar-wrap"><div class="bar-fill" id="load-bar"></div></div>
   <div id="load-text">INICIALIZANDO SISTEMAS...</div>
-  <button class="start-btn" id="start-btn">▶ &nbsp;COMENZAR MISIÓN</button>
+  <button class="start-btn" id="start-btn">▶&nbsp;&nbsp;COMENZAR MISIÓN</button>
 </div>
 
 <!-- MAIN CANVAS -->
@@ -193,17 +312,27 @@ canvas{display:block;width:100vw;height:100vh}
 <div id="hud">
   <div id="transform-bar"><div id="transform-fill"></div></div>
 
+  <!-- Corporate health bar -->
+  <div id="health-bar-wrap">
+    <div class="health-label">SALUD ERGONÓMICA EMPRESARIAL</div>
+    <div class="health-track"><div id="health-fill"></div></div>
+  </div>
+
+  <!-- Budget + ErgoPuntos -->
   <div id="budget-panel">
     <div class="hud-label">PRESUPUESTO</div>
     <div class="hud-value" id="budget-val">5.000 €</div>
+    <div class="hud-sub">⭐ <span id="ergo-pts">0</span> ErgoPuntos</div>
   </div>
 
+  <!-- Productivity -->
   <div id="prod-panel">
     <div class="hud-label">PRODUCTIVIDAD</div>
     <div class="hud-value" id="prod-val">54%</div>
     <div class="prod-bar"><div class="prod-fill" id="prod-fill" style="width:54%"></div></div>
   </div>
 
+  <!-- Crosshair -->
   <div id="xhair"><div class="dot"></div></div>
   <div id="hint"></div>
 
@@ -218,27 +347,11 @@ canvas{display:block;width:100vw;height:100vh}
   <!-- Diagnostic panel -->
   <div id="diagnostic">
     <div class="diag-title">ANÁLISIS POSTURAL</div>
-    <div class="diag-row">
-      <div class="diag-icon ok" id="d-neck-icon">🔵</div>
-      <div class="diag-label">Cuello</div>
-      <div class="diag-angle ok" id="d-neck-val">–°</div>
-    </div>
-    <div class="diag-row">
-      <div class="diag-icon ok" id="d-back-icon">🔵</div>
-      <div class="diag-label">Columna</div>
-      <div class="diag-angle ok" id="d-back-val">–°</div>
-    </div>
-    <div class="diag-row">
-      <div class="diag-icon ok" id="d-wrist-icon">🔵</div>
-      <div class="diag-label">Muñecas</div>
-      <div class="diag-angle ok" id="d-wrist-val">–°</div>
-    </div>
-    <div class="diag-row">
-      <div class="diag-icon ok" id="d-hours-icon">🔵</div>
-      <div class="diag-label">Horas sentado</div>
-      <div class="diag-angle ok" id="d-hours-val">–h</div>
-    </div>
-    <div class="diag-severity sev-none" id="d-severity">SIN PROBLEMAS</div>
+    <div class="diag-row"><div class="diag-icon ok" id="d-neck-icon">🔵</div><div class="diag-label">Cuello</div><div class="diag-angle ok" id="d-neck-val">–°</div></div>
+    <div class="diag-row"><div class="diag-icon ok" id="d-back-icon">🔵</div><div class="diag-label">Columna</div><div class="diag-angle ok" id="d-back-val">–°</div></div>
+    <div class="diag-row"><div class="diag-icon ok" id="d-wrist-icon">🔵</div><div class="diag-label">Muñecas</div><div class="diag-angle ok" id="d-wrist-val">–°</div></div>
+    <div class="diag-row"><div class="diag-icon ok" id="d-hours-icon">🔵</div><div class="diag-label">Horas sentado</div><div class="diag-angle ok" id="d-hours-val">–h</div></div>
+    <div class="diag-severity sev-none" id="d-severity">APUNTA A UN EMPLEADO</div>
   </div>
 
   <!-- NPC card -->
@@ -253,18 +366,35 @@ canvas{display:block;width:100vw;height:100vh}
     </div>
   </div>
 
+  <!-- Minimap -->
+  <div id="minimap-wrap">
+    <div class="map-label">MAPA DE PLANTA</div>
+    <canvas id="minimap" width="160" height="160"></canvas>
+  </div>
+
+  <!-- University logo (small HUD) -->
+  <div id="uni-logo-hud">
+    <img src="/logo-universidad.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="uni-text" style="display:none">🎓 UNIVERSIDAD</div>
+  </div>
+
   <!-- Email notifications -->
   <div id="email-notif"></div>
 
   <!-- Notifications -->
   <div id="notif-area"></div>
 
-  <!-- Controls legend -->
+  <!-- Achievement popups -->
+  <div id="achievement-area"></div>
+
+  <!-- Controls -->
   <div id="controls">
     <span class="ctrl-key">WASD</span><span class="ctrl-desc">Mover</span>
     <span class="ctrl-key">Q</span><span class="ctrl-desc">Escáner</span>
-    <span class="ctrl-key">E</span><span class="ctrl-desc">Interactuar</span>
+    <span class="ctrl-key">E</span><span class="ctrl-desc">Hablar</span>
     <span class="ctrl-key">B</span><span class="ctrl-desc">Tienda</span>
+    <span class="ctrl-key">R</span><span class="ctrl-desc">Ergonomía</span>
+    <span class="ctrl-key">T</span><span class="ctrl-desc">Stats</span>
     <span class="ctrl-key">ESC</span><span class="ctrl-desc">Menú</span>
   </div>
 </div>
@@ -278,22 +408,176 @@ canvas{display:block;width:100vw;height:100vh}
     </div>
     <div class="shop-npc-sel">
       <label>DESTINAR A EMPLEADO</label>
-      <select id="shop-npc-sel">
-        <option value="all">Todos los empleados</option>
-      </select>
+      <select id="shop-npc-sel"><option value="all">Todos los empleados</option></select>
     </div>
     <div class="shop-items" id="shop-items-list"></div>
   </div>
 </div>
 
-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.155.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.155.0/examples/jsm/"}}</script>
+<!-- ERGONOMICS PANEL -->
+<div id="ergo-panel">
+  <button class="ergo-close-btn" onclick="closeErgoPanel()">✕ CERRAR [R]</button>
+  <div class="ergo-container">
+    <div class="ergo-header">
+      <h1>🏋️ GUÍA ERGONÓMICA PROFESIONAL</h1>
+      <p>BASADO EN NORMATIVAS OIT · ISO 9241 · MÉTODO REBA</p>
+    </div>
+    <div class="ergo-grid">
+      <!-- Correct posture -->
+      <div class="ergo-card">
+        <div class="ergo-card-icon">✅</div>
+        <h3>La Postura Correcta</h3>
+        <ul>
+          <li>Espalda recta con soporte lumbar activo</li>
+          <li>Monitor al nivel de los ojos (±5°)</li>
+          <li>Codos a 90° o ligeramente abiertos</li>
+          <li>Muñecas neutras al teclear</li>
+          <li>Pies planos en el suelo o reposapiés</li>
+          <li>Rodillas a 90°, caderas ligeramente por encima</li>
+        </ul>
+        <div class="ergo-angles">
+          <div class="angle-item"><div class="angle-num">0-15°</div><div class="angle-label">Cuello</div></div>
+          <div class="angle-item"><div class="angle-num">0-10°</div><div class="angle-label">Columna</div></div>
+          <div class="angle-item"><div class="angle-num">0-10°</div><div class="angle-label">Muñecas</div></div>
+          <div class="angle-item"><div class="angle-num">90°</div><div class="angle-label">Codos</div></div>
+        </div>
+      </div>
+      <!-- Risks -->
+      <div class="ergo-card">
+        <div class="ergo-card-icon">⚠️</div>
+        <h3>Riesgos de Malas Posturas</h3>
+        <ul>
+          <li>Lumbalgia crónica (causa #1 de baja laboral)</li>
+          <li>Síndrome del túnel carpiano</li>
+          <li>Tendinitis de hombros y codos</li>
+          <li>Migrañas cervicogénicas</li>
+          <li>Síndrome del ojo seco por pantalla</li>
+          <li>Varices y mala circulación venosa</li>
+          <li>Fatiga mental y baja concentración</li>
+        </ul>
+      </div>
+      <!-- Solutions -->
+      <div class="ergo-card">
+        <div class="ergo-card-icon">🛠️</div>
+        <h3>Soluciones Ergonómicas</h3>
+        <ul>
+          <li><strong style="color:#00d4c8">Silla ergonómica</strong>: soporte lumbar ajustable</li>
+          <li><strong style="color:#00d4c8">Soporte de monitor</strong>: llevar pantalla a nivel ocular</li>
+          <li><strong style="color:#00d4c8">Reposamuñecas</strong>: neutralizar la flexión de muñeca</li>
+          <li><strong style="color:#00d4c8">Mesa elevable</strong>: alternar sentado/de pie</li>
+          <li><strong style="color:#00d4c8">Reposapiés</strong>: alinear postura de piernas</li>
+          <li><strong style="color:#00d4c8">Iluminación LED</strong>: reducir fatiga visual</li>
+        </ul>
+      </div>
+      <!-- Stats OIT -->
+      <div class="ergo-card">
+        <div class="ergo-card-icon">📊</div>
+        <h3>Datos OIT y OMS 2024</h3>
+        <div class="ergo-stats">
+          <div class="estat"><div class="estat-num">80%</div><div class="estat-desc">trabajadores sufren dolor lumbar en algún momento</div></div>
+          <div class="estat"><div class="estat-num">4:1</div><div class="estat-desc">retorno: cada €1 en ergonomía ahorra 4€ en bajas</div></div>
+          <div class="estat"><div class="estat-num">40%</div><div class="estat-desc">reducción de fatiga con pausas activas regulares</div></div>
+        </div>
+      </div>
+      <!-- Checklist -->
+      <div class="ergo-card full">
+        <div class="ergo-card-icon">📋</div>
+        <h3>Checklist Postural Diario</h3>
+        <div class="ergo-checklist">
+          <div class="check-item"><input type="checkbox" id="c1"><label for="c1">¿Tu silla tiene soporte lumbar activo?</label></div>
+          <div class="check-item"><input type="checkbox" id="c2"><label for="c2">¿Tus pies tocan el suelo o el reposapiés?</label></div>
+          <div class="check-item"><input type="checkbox" id="c3"><label for="c3">¿El monitor está a la altura de tus ojos?</label></div>
+          <div class="check-item"><input type="checkbox" id="c4"><label for="c4">¿Tus muñecas están rectas al teclear?</label></div>
+          <div class="check-item"><input type="checkbox" id="c5"><label for="c5">¿Tu espalda está apoyada en el respaldo?</label></div>
+          <div class="check-item"><input type="checkbox" id="c6"><label for="c6">¿Has hecho una pausa activa en las últimas 2h?</label></div>
+          <div class="check-item"><input type="checkbox" id="c7"><label for="c7">¿Tu iluminación evita reflejos en pantalla?</label></div>
+          <div class="check-item"><input type="checkbox" id="c8"><label for="c8">¿Los codos forman ±90° con el escritorio?</label></div>
+        </div>
+      </div>
+      <!-- Active breaks -->
+      <div class="ergo-card full">
+        <div class="ergo-card-icon">⌚</div>
+        <h3>Pausas Activas (cada 2 horas, 5 minutos)</h3>
+        <div class="exercise-grid">
+          <div class="exercise"><div class="exercise-icon">🔄</div><h4>Rotación Cervical</h4><p>Gira la cabeza lentamente de lado a lado. 10 repeticiones. Alivia tensión del cuello.</p></div>
+          <div class="exercise"><div class="exercise-icon">🤸</div><h4>Estiramiento de Hombros</h4><p>Entrelaza los dedos y estira los brazos hacia arriba. Mantén 20 segundos.</p></div>
+          <div class="exercise"><div class="exercise-icon">✊</div><h4>Ejercicio de Muñecas</h4><p>Cierra el puño y ábrelo lentamente. Rotaciones circulares. 15 repeticiones.</p></div>
+          <div class="exercise"><div class="exercise-icon">🧘</div><h4>Respiración Diafragmática</h4><p>Inhala 4 seg por la nariz, mantén 2 seg, exhala 6 seg. 5 ciclos.</p></div>
+          <div class="exercise"><div class="exercise-icon">🦵</div><h4>Activación de Piernas</h4><p>De pie, eleva las rodillas alternamente 20 veces. Mejora la circulación.</p></div>
+          <div class="exercise"><div class="exercise-icon">👁️</div><h4>Regla 20-20-20</h4><p>Cada 20 min, mira un objeto a 20 pies (6m) durante 20 segundos.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS PANEL -->
+<div id="stats-panel">
+  <div class="stats-container" style="position:relative">
+    <button class="stats-close" onclick="closeStatsPanel()">✕ CERRAR [T]</button>
+    <div class="stats-header">
+      <h2>📊 ESTADÍSTICAS DE MISIÓN</h2>
+      <p>INFORME EN TIEMPO REAL</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="sval" id="st-time">00:00</div><div class="slabel">Tiempo Jugado</div></div>
+      <div class="stat-card"><div class="sval" id="st-scanned">0/5</div><div class="slabel">NPCs Escaneados</div></div>
+      <div class="stat-card"><div class="sval" id="st-spent">0 €</div><div class="slabel">Total Invertido</div></div>
+      <div class="stat-card"><div class="sval" id="st-pts">0</div><div class="slabel">ErgoPuntos</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="hud-label" style="margin-bottom:10px;font-size:10px;letter-spacing:2px">ESTADO DE EMPLEADOS</div>
+      <div class="npc-status-list" id="npc-status-list"></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="hud-label" style="margin-bottom:10px;font-size:10px;letter-spacing:2px">LOGROS DESBLOQUEADOS</div>
+      <div class="achievement-list" id="achievement-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TUTORIAL OVERLAY -->
+<div id="tutorial">
+  <div class="tutorial-box">
+    <div class="tutorial-icon">🔍</div>
+    <h2>BIENVENIDO, INSPECTOR</h2>
+    <p>Eres un consultor ergonómico contratado para salvar la empresa. Diagnostica a los empleados, compra soluciones ergonómicas y eleva la productividad al 100%.</p>
+    <div class="tut-keys">
+      <div class="tut-key"><span class="key">WASD</span><p>Desplazarte por la oficina</p></div>
+      <div class="tut-key"><span class="key">MOUSE</span><p>Girar la cámara (click primero)</p></div>
+      <div class="tut-key"><span class="key">Q</span><p>Activar escáner postural</p></div>
+      <div class="tut-key"><span class="key">E</span><p>Hablar con empleados</p></div>
+      <div class="tut-key"><span class="key">B</span><p>Abrir tienda ergonómica</p></div>
+      <div class="tut-key"><span class="key">R</span><p>Guía ergonómica</p></div>
+    </div>
+    <button class="tut-btn" id="tut-start">¡COMENZAR INSPECCIÓN!</button>
+    <button class="tut-no-show" id="tut-no-show">No volver a mostrar este tutorial</button>
+  </div>
+</div>
+
+<!-- CONFETTI + FLASH -->
+<div id="confetti-container"></div>
+<div id="victory-flash"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.155.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.155.0/examples/jsm/"
+  }
+}
+</script>
 
 <script type="module">
 import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // GAME STATE
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 const state = {
   budget: 5000,
   productivity: 54,
@@ -302,18 +586,25 @@ const state = {
   isLocked: false,
   selectedNPC: null,
   shopOpen: false,
-  emailOpen: false,
+  ergoOpen: false,
+  statsOpen: false,
+  tutorialOpen: false,
   gameStarted: false,
   totalPurchases: 0,
+  totalSpent: 0,
   emails: [],
   unreadEmails: 0,
   notifications: [],
   scannedNPCs: new Set(),
+  ergoPuntos: 0,
+  achievements: new Set(),
+  victoryShown: false,
+  startTime: 0,
 };
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // NPC DATA
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 const NPC_DATA = [
   {
     id:'npc_001', name:'Carlos Mendoza', role:'Call Center', emoji:'😟',
@@ -321,9 +612,9 @@ const NPC_DATA = [
     posture:{neck:25,spine:18,wrist:22,elbow:85}, seatedHours:5.2,
     fatigue:70, productivity:45, healthy:false,
     dialogue:{
-      greeting:'Llevo 5 horas sin levantarme. Siento la espalda rígida.',
+      greeting:'Llevo 5 horas sin levantarme. La espalda está agarrotada.',
       pain:'Me duele el cuello y la zona lumbar constantemente.',
-      need:'Necesito urgente una silla ergonómica y soporte para monitor.'
+      need:'Necesito urgente una silla ergonómica y soporte para el monitor.'
     }
   },
   {
@@ -354,9 +645,9 @@ const NPC_DATA = [
     posture:{neck:10,spine:8,wrist:8,elbow:92}, seatedHours:2.0,
     fatigue:25, productivity:85, healthy:true,
     dialogue:{
-      greeting:'Me siento bien, mi silla nueva es excelente.',
+      greeting:'Me siento muy bien, mi silla nueva es excelente.',
       pain:'Sin dolores hoy, gracias a los ajustes que hice.',
-      need:'Estoy muy cómodo, pero mis compañeros sí necesitan ayuda.'
+      need:'Estoy muy cómodo. ¡Mis compañeros sí necesitan ayuda!'
     }
   },
   {
@@ -372,32 +663,136 @@ const NPC_DATA = [
   }
 ];
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // SHOP ITEMS
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 const SHOP_ITEMS = [
-  {id:'ergonomic_chair',name:'Silla Ergonómica',desc:'Soporte lumbar ajustable y reposabrazos regulables',icon:'🪑',price:450,category:'furniture',effects:{spine:-10,neck:-5,fatigue:-20,prod:15},tags:['espalda','lumbar','postura']},
-  {id:'monitor_stand',name:'Soporte Monitor',desc:'Eleva la pantalla al nivel de los ojos',icon:'🖥️',price:120,category:'accessory',effects:{neck:-15,spine:-5,fatigue:-10,prod:10},tags:['cuello','cabeza','monitor']},
-  {id:'wrist_rest',name:'Reposamuñecas',desc:'Almohadilla ergonómica para teclado',icon:'⌨️',price:35,category:'accessory',effects:{wrist:-12,fatigue:-8,prod:8},tags:['muñecas','dedos','manos']},
-  {id:'footrest',name:'Reposapiés',desc:'Apoya los pies en ángulo correcto (90°)',icon:'🦶',price:65,category:'accessory',effects:{spine:-5,fatigue:-12,prod:5},tags:['piernas','circulación']},
-  {id:'standing_desk',name:'Mesa Elevable',desc:'Permite alternar trabajo de pie y sentado',icon:'📐',price:350,category:'furniture',effects:{spine:-20,neck:-10,fatigue:-25,prod:20},tags:['todo','premium']},
-  {id:'active_break',name:'Pausas Activas',desc:'Programa de estiramientos guiados cada 2h',icon:'🧘',price:200,category:'training',effects:{fatigue:-30,prod:15},tags:['todos','fatiga']},
-  {id:'office_lighting',name:'Iluminación LED',desc:'Luz de espectro completo, sin parpadeo',icon:'💡',price:500,category:'environment',effects:{fatigue:-15,prod:10},tags:['ojos','global']},
-  {id:'ergo_training',name:'Formación Ergonómica',desc:'Taller de higiene postural para el equipo',icon:'📚',price:300,category:'training',effects:{neck:-5,spine:-5,prod:12},tags:['conciencia','todos']}
+  {id:'ergonomic_chair',name:'Silla Ergonómica',desc:'Soporte lumbar ajustable y reposabrazos regulables',icon:'🪑',price:450,effects:{spine:-10,neck:-5,fatigue:-20,prod:15},tags:['espalda','lumbar','postura']},
+  {id:'monitor_stand',name:'Soporte Monitor',desc:'Eleva la pantalla al nivel de los ojos',icon:'🖥️',price:120,effects:{neck:-15,spine:-5,fatigue:-10,prod:10},tags:['cuello','monitor']},
+  {id:'wrist_rest',name:'Reposamuñecas',desc:'Almohadilla ergonómica para teclado',icon:'⌨️',price:35,effects:{wrist:-12,fatigue:-8,prod:8},tags:['muñecas','manos']},
+  {id:'footrest',name:'Reposapiés',desc:'Apoya los pies en ángulo correcto (90°)',icon:'🦶',price:65,effects:{spine:-5,fatigue:-12,prod:5},tags:['piernas','circulación']},
+  {id:'standing_desk',name:'Mesa Elevable',desc:'Permite alternar trabajo de pie y sentado',icon:'📐',price:350,effects:{spine:-20,neck:-10,fatigue:-25,prod:20},tags:['todo','premium']},
+  {id:'active_break',name:'Pausas Activas',desc:'Programa de estiramientos guiados cada 2h',icon:'🧘',price:200,effects:{fatigue:-30,prod:15},tags:['todos','fatiga']},
+  {id:'office_lighting',name:'Iluminación LED',desc:'Luz de espectro completo, sin parpadeo',icon:'💡',price:500,effects:{fatigue:-15,prod:10},tags:['ojos','global']},
+  {id:'ergo_training',name:'Formación Ergonómica',desc:'Taller de higiene postural para el equipo',icon:'📚',price:300,effects:{neck:-5,spine:-5,prod:12},tags:['conciencia','todos']}
 ];
 
 // Email content
 const EMAILS_DATA = [
-  {id:'e1',subject:'URGENTE: Bajas por dolor lumbar',from:'RRHH',content:'Aumento del 40% en bajas por dolores de espalda este mes. Se requiere evaluación inmediata.',category:'urgent',triggerType:'immediate'},
-  {id:'e2',subject:'Reunión de emergencia del Sindicato',from:'Comité de Trabajadores',content:'Los empleados han reportado condiciones insatisfactorias. Necesitamos una reunión urgente.',category:'warning',triggerType:'scan',triggerVal:2},
-  {id:'e3',subject:'Presupuesto extra aprobado',from:'Dirección General',content:'Se aprueba presupuesto adicional de 500€ para mejoras ergonómicas. ¡Bien hecho!',category:'positive',triggerType:'purchase',triggerVal:1},
-  {id:'e4',subject:'Reporte: Productividad en recuperación',from:'Business Analytics',content:'Los datos muestran mejora del 15% en productividad. La inversión está dando resultados.',category:'report',triggerType:'productivity',triggerVal:65},
-  {id:'e5',subject:'¡Felicitaciones del CEO!',from:'CEO – Global Corp',content:'La empresa está viendo resultados extraordinarios. Han transformado nuestro ambiente laboral.',category:'positive',triggerType:'productivity',triggerVal:80},
+  {id:'e1',subject:'URGENTE: Bajas por dolor lumbar',from:'RRHH',content:'Aumento del 40% en bajas por dolores de espalda este mes.',category:'urgent',triggerType:'immediate'},
+  {id:'e2',subject:'Reunión de emergencia del Sindicato',from:'Comité de Trabajadores',content:'Los empleados reportan condiciones insatisfactorias.',category:'warning',triggerType:'scan',triggerVal:2},
+  {id:'e3',subject:'Presupuesto extra aprobado',from:'Dirección General',content:'Se aprueba presupuesto adicional de 500€. ¡Bien hecho!',category:'positive',triggerType:'purchase',triggerVal:1},
+  {id:'e4',subject:'Reporte: Productividad en recuperación',from:'Business Analytics',content:'Mejora del 15% en productividad. La inversión está dando resultados.',category:'report',triggerType:'productivity',triggerVal:65},
+  {id:'e5',subject:'¡Felicitaciones del CEO!',from:'CEO – Global Corp',content:'Han transformado nuestro ambiente laboral. Resultados extraordinarios.',category:'positive',triggerType:'productivity',triggerVal:80},
 ];
 
-// ═══════════════════════════════════════════════
-// THREE.JS SETUP
-// ═══════════════════════════════════════════════
+// Achievements definition
+const ACHIEVEMENTS_DEF = [
+  {id:'first_scan', icon:'🔍', name:'Primer Diagnóstico', desc:'Escanear el primer empleado', pts:10},
+  {id:'all_scanned', icon:'🌟', name:'Inspector Total', desc:'Escanear a los 5 empleados', pts:50},
+  {id:'first_buy', icon:'🛒', name:'Primera Compra', desc:'Adquirir el primer ítem ergonómico', pts:25},
+  {id:'five_buys', icon:'🏪', name:'Comprador Experto', desc:'Realizar 5 compras', pts:75},
+  {id:'hero_back', icon:'💪', name:'Héroe de la Espalda', desc:'Mejorar a 2 empleados', pts:100},
+  {id:'ergo_total', icon:'🏆', name:'Ergonomía Total', desc:'Alcanzar 100% de productividad', pts:200},
+  {id:'budget_100', icon:'💰', name:'Inversor Eficiente', desc:'Gastar más de 1000€', pts:50},
+  {id:'puntos_500', icon:'⭐', name:'ErgoPuntos Experto', desc:'Acumular 500 ErgoPuntos', pts:100},
+];
+
+// ══════════════════════════════════════════════════════
+// WEB AUDIO SYSTEM
+// ══════════════════════════════════════════════════════
+const SoundManager = {
+  ctx: null,
+  enabled: true,
+  ambientGain: null,
+  init(){
+    try {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.setupAmbient();
+    } catch(e) {
+      this.enabled = false;
+    }
+  },
+  resume(){
+    if(this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  beep(freq, dur, type='sine', vol=0.12, detune=0){
+    if(!this.enabled || !this.ctx) return;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.connect(g); g.connect(this.ctx.destination);
+    o.type = type; o.frequency.value = freq; o.detune.value = detune;
+    g.gain.setValueAtTime(vol, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+    o.start(); o.stop(this.ctx.currentTime + dur);
+  },
+  sweep(f0, f1, dur, type='sawtooth', vol=0.08){
+    if(!this.enabled || !this.ctx) return;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    const flt = this.ctx.createBiquadFilter();
+    flt.type = 'lowpass'; flt.frequency.value = 1200;
+    o.connect(flt); flt.connect(g); g.connect(this.ctx.destination);
+    o.type = type;
+    o.frequency.setValueAtTime(f0, this.ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(f1, this.ctx.currentTime + dur);
+    g.gain.setValueAtTime(vol, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur + 0.05);
+    o.start(); o.stop(this.ctx.currentTime + dur + 0.1);
+  },
+  playScanner(){ this.sweep(150, 900, 0.35, 'sawtooth', 0.07); },
+  playPostureBad(){
+    this.beep(200, 0.25, 'square', 0.08);
+    setTimeout(()=>this.beep(160, 0.2, 'square', 0.07), 280);
+  },
+  playPostureGood(){
+    this.beep(880, 0.12, 'sine', 0.1);
+    setTimeout(()=>this.beep(1100, 0.18, 'sine', 0.08), 130);
+  },
+  playPurchase(){
+    [523, 659, 784].forEach((f,i)=>setTimeout(()=>this.beep(f,0.28,'sine',0.12),i*80));
+  },
+  playAchievement(){
+    [523,659,784,1047].forEach((f,i)=>setTimeout(()=>this.beep(f,0.35,'triangle',0.14),i*90));
+  },
+  playEmail(){
+    this.beep(660, 0.1, 'sine', 0.08);
+    setTimeout(()=>this.beep(880, 0.14, 'sine', 0.06), 110);
+  },
+  playVictory(){
+    const seq=[523,659,784,523,659,784,1047,1175];
+    seq.forEach((f,i)=>setTimeout(()=>this.beep(f,0.45,'triangle',0.15),i*110));
+  },
+  setupAmbient(){
+    if(!this.ctx) return;
+    // Pink noise ambient
+    const sr = this.ctx.sampleRate;
+    const buf = this.ctx.createBuffer(1, sr*3, sr);
+    const d = buf.getChannelData(0);
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for(let i=0;i<d.length;i++){
+      const w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.153852; b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.016898;
+      d[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.04; b6=w*0.115926;
+    }
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    const g = this.ctx.createGain();
+    g.gain.value = 0.025;
+    const flt = this.ctx.createBiquadFilter();
+    flt.type = 'bandpass'; flt.frequency.value = 400; flt.Q.value = 0.5;
+    src.connect(flt); flt.connect(g); g.connect(this.ctx.destination);
+    src.start();
+    this.ambientGain = g;
+  },
+  setAmbient(vol){ if(this.ambientGain) this.ambientGain.gain.value = Math.max(0.005, vol*0.04); }
+};
+
+// ══════════════════════════════════════════════════════
+// THREE.JS RENDERER SETUP
+// ══════════════════════════════════════════════════════
 const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -405,142 +800,258 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+renderer.toneMappingExposure = 1.15;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x050d14);
-scene.fog = new THREE.FogExp2(0x0a1628, 0.025);
+scene.background = new THREE.Color(0x070d16);
+scene.fog = new THREE.FogExp2(0x0a1628, 0.022);
 
-const camera = new THREE.PerspectiveCamera(72, window.innerWidth/window.innerHeight, 0.1, 200);
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 150);
 camera.position.set(0, 1.65, 2);
 
 const clock = new THREE.Clock();
 const raycaster = new THREE.Raycaster();
 const center = new THREE.Vector2(0,0);
 
-// ═══════════════════════════════════════════════
-// LIGHTING
-// ═══════════════════════════════════════════════
-function setupLighting(){
-  const ambient = new THREE.AmbientLight(0x304060, 0.7);
-  scene.add(ambient);
+// ══════════════════════════════════════════════════════
+// POST-PROCESSING
+// ══════════════════════════════════════════════════════
+let composer, usePostFX = false;
 
-  const sun = new THREE.DirectionalLight(0xfff0e0, 1.3);
-  sun.position.set(8, 12, 6);
+const FilmGrainShader = {
+  uniforms: { tDiffuse:{value:null}, time:{value:0}, intensity:{value:0.032} },
+  vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fragmentShader:`
+    uniform sampler2D tDiffuse;
+    uniform float time;
+    uniform float intensity;
+    varying vec2 vUv;
+    float rand(vec2 co){return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453);}
+    void main(){
+      vec4 color=texture2D(tDiffuse,vUv);
+      float noise=(rand(vUv+fract(time*0.01))-0.5)*intensity;
+      color.rgb=clamp(color.rgb+noise,0.,1.);
+      gl_FragColor=color;
+    }`
+};
+
+try {
+  composer = new EffectComposer(renderer);
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.65, 0.45, 0.25
+  );
+  composer.addPass(bloomPass);
+
+  const grainPass = new ShaderPass(FilmGrainShader);
+  grainPass.uniforms.intensity.value = 0.032;
+  composer.addPass(grainPass);
+
+  usePostFX = true;
+  window._grainPass = grainPass;
+} catch(e) {
+  console.warn('Post-processing unavailable, using basic renderer.');
+}
+
+// ══════════════════════════════════════════════════════
+// PROCEDURAL TEXTURES
+// ══════════════════════════════════════════════════════
+function makeCanvasTex(w, h, fn, repeat=4){
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  fn(c.getContext('2d'), w, h);
+  const t=new THREE.CanvasTexture(c);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(repeat,repeat);
+  return t;
+}
+
+const floorTex = makeCanvasTex(512, 512, (ctx,w,h)=>{
+  // Office carpet tiles
+  ctx.fillStyle='#1a2535'; ctx.fillRect(0,0,w,h);
+  const ts=64;
+  for(let x=0;x<w;x+=ts) for(let y=0;y<h;y+=ts){
+    const v=Math.random()*12-6;
+    ctx.fillStyle=`rgb(${26+v},${37+v},${53+v})`;
+    ctx.fillRect(x+1,y+1,ts-2,ts-2);
+  }
+  // Subtle noise
+  for(let i=0;i<3000;i++){
+    const x=Math.random()*w, y=Math.random()*h;
+    const a=Math.random()*0.06;
+    ctx.fillStyle=`rgba(255,255,255,${a})`;
+    ctx.fillRect(x,y,1,1);
+  }
+}, 6);
+
+const wallTex = makeCanvasTex(512,512,(ctx,w,h)=>{
+  ctx.fillStyle='#cfd8e0'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<5000;i++){
+    const x=Math.random()*w, y=Math.random()*h;
+    const v=Math.random()*20-10;
+    const c=200+Math.round(v);
+    ctx.fillStyle=`rgba(${c},${c+8},${c+16},0.08)`;
+    ctx.fillRect(x,y,2,2);
+  }
+},3);
+
+const deskTex = makeCanvasTex(256,256,(ctx,w,h)=>{
+  ctx.fillStyle='#7c5c3e'; ctx.fillRect(0,0,w,h);
+  // Wood grain lines
+  for(let i=0;i<40;i++){
+    const y=Math.random()*h;
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    for(let x=0;x<w;x+=8){
+      ctx.lineTo(x, y+Math.sin(x*0.08+i)*3+Math.random()*2-1);
+    }
+    ctx.strokeStyle=`rgba(${100+Math.random()*40},${60+Math.random()*30},${20+Math.random()*20},0.25)`;
+    ctx.lineWidth=1+Math.random();
+    ctx.stroke();
+  }
+},2);
+
+// ══════════════════════════════════════════════════════
+// LIGHTING
+// ══════════════════════════════════════════════════════
+function setupLighting(){
+  // Ambient
+  const amb = new THREE.AmbientLight(0x304060, 0.55);
+  scene.add(amb);
+
+  // Main directional (sunlight through windows)
+  const sun = new THREE.DirectionalLight(0xfff8e8, 1.4);
+  sun.position.set(12, 14, 6);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048,2048);
   sun.shadow.camera.near = 0.5;
-  sun.shadow.camera.far = 40;
-  sun.shadow.camera.left = -18;
-  sun.shadow.camera.right = 18;
-  sun.shadow.camera.top = 18;
-  sun.shadow.camera.bottom = -18;
+  sun.shadow.camera.far = 50;
+  sun.shadow.camera.left = -20;
+  sun.shadow.camera.right = 20;
+  sun.shadow.camera.top = 20;
+  sun.shadow.camera.bottom = -20;
   sun.shadow.bias = -0.001;
+  sun.shadow.normalBias = 0.02;
   scene.add(sun);
 
-  // Ceiling fill lights (office style)
-  const ceilPositions = [
-    [-7,-7],[0,-7],[7,-7],
-    [-7,0],[0,0],[7,0],
-    [-7,7],[0,7],[7,7]
+  // Ceiling light panels — visible geometry + point lights
+  const panelMat = new THREE.MeshStandardMaterial({
+    color:0xfff8f0, emissive:0xfff8f0, emissiveIntensity:2.5, roughness:0.2
+  });
+  const panelGeo = new THREE.PlaneGeometry(1.2, 0.5);
+  const lightPositions = [
+    [-6,2.92,-6],[0,2.92,-6],[6,2.92,-6],
+    [-6,2.92,0],[0,2.92,0],[6,2.92,0],
+    [-6,2.92,6],[0,2.92,6],[6,2.92,6]
   ];
-  ceilPositions.forEach(([x,z])=>{
-    const l = new THREE.PointLight(0xfff5e0,0.5,8,1.5);
-    l.position.set(x,2.9,z);
-    scene.add(l);
+  lightPositions.forEach(([x,y,z])=>{
+    const panel = new THREE.Mesh(panelGeo, panelMat);
+    panel.rotation.x = Math.PI/2;
+    panel.position.set(x,y,z);
+    scene.add(panel);
+
+    const pl = new THREE.PointLight(0xfff5e0, 0.55, 9, 1.8);
+    pl.position.set(x, y-0.1, z);
+    scene.add(pl);
   });
 
-  // Teal accent fill
-  const accent1 = new THREE.PointLight(0x004488,0.3,15);
-  accent1.position.set(-14,2,-14);
-  scene.add(accent1);
-  const accent2 = new THREE.PointLight(0x002244,0.3,15);
-  accent2.position.set(14,2,14);
-  scene.add(accent2);
+  // Window accent lights (warm blue from outside)
+  const winPositions = [[15.5,1.5,-6],[15.5,1.5,0],[15.5,1.5,6]];
+  winPositions.forEach(([x,y,z])=>{
+    const wl = new THREE.PointLight(0x6699ff, 0.45, 10);
+    wl.position.set(x-1, y, z);
+    scene.add(wl);
+  });
+
+  // Warm teal accent
+  const a1 = new THREE.PointLight(0x003366, 0.28, 18);
+  a1.position.set(-14, 2, -14); scene.add(a1);
+  const a2 = new THREE.PointLight(0x002244, 0.28, 18);
+  a2.position.set(14, 2, 14); scene.add(a2);
+
+  // Reception area accent
+  const recep = new THREE.PointLight(0xffeedd, 0.4, 8);
+  recep.position.set(0, 2.5, -12); scene.add(recep);
 }
 setupLighting();
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // SCENE GEOMETRY
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 function buildScene(){
   // Floor
-  const floorGeo = new THREE.PlaneGeometry(32,32);
-  const floorMat = new THREE.MeshStandardMaterial({color:0x1a2535,roughness:0.85,metalness:0.05});
-  const floor = new THREE.Mesh(floorGeo,floorMat);
+  const floorMat = new THREE.MeshStandardMaterial({
+    map:floorTex, roughness:0.88, metalness:0.04, color:0xaaaaaa
+  });
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(34,34), floorMat);
   floor.rotation.x = -Math.PI/2;
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // Floor tiles
-  const tileGeo = new THREE.PlaneGeometry(1.9,1.9);
-  const tileMat = new THREE.MeshStandardMaterial({color:0x1e2d3e,roughness:0.7});
-  for(let x=-7;x<=7;x+=2) for(let z=-7;z<=7;z+=2){
-    const tile = new THREE.Mesh(tileGeo,tileMat);
-    tile.rotation.x = -Math.PI/2;
-    tile.position.set(x,0.001,z);
-    tile.receiveShadow = true;
-    scene.add(tile);
-  }
+  // Baseboard
+  const baseGeo = new THREE.BoxGeometry(34, 0.08, 0.06);
+  const baseMat = new THREE.MeshStandardMaterial({color:0x888ea0, roughness:0.4});
+  [[-17,0.04,0,Math.PI/2],[17,0.04,0,Math.PI/2],[0,0.04,-17,0],[0,0.04,17,0]].forEach(([x,y,z,ry])=>{
+    const b = new THREE.Mesh(baseGeo, baseMat);
+    b.position.set(x,y,z); b.rotation.y=ry; scene.add(b);
+  });
 
   // Walls
-  const wallMat = new THREE.MeshStandardMaterial({color:0xd0d8e0,roughness:0.6});
-  const wallDark = new THREE.MeshStandardMaterial({color:0x2a3548,roughness:0.5});
+  const wallMat = new THREE.MeshStandardMaterial({map:wallTex,roughness:0.55,metalness:0.02,color:0xdddddd});
+  const wallDark = new THREE.MeshStandardMaterial({color:0x283448,roughness:0.5});
   const walls=[
-    {pos:[-16,1.5,0],w:0.3,h:3,d:32,mat:wallDark},
-    {pos:[16,1.5,0],w:0.3,h:3,d:32,mat:wallDark},
-    {pos:[0,1.5,-16],w:32,h:3,d:0.3,mat:wallMat},
-    {pos:[0,1.5,16],w:32,h:3,d:0.3,mat:wallDark},
+    {pos:[-16.15,1.5,0],w:0.3,h:3,d:34,mat:wallDark},
+    {pos:[16.15,1.5,0],w:0.3,h:3,d:34,mat:wallDark},
+    {pos:[0,1.5,-16.15],w:34,h:3,d:0.3,mat:wallMat},
+    {pos:[0,1.5,16.15],w:34,h:3,d:0.3,mat:wallDark},
   ];
   walls.forEach(({pos,w,h,d,mat})=>{
     const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
-    m.position.set(...pos);
-    m.receiveShadow=true;
-    scene.add(m);
+    m.position.set(...pos); m.receiveShadow=true; scene.add(m);
   });
 
   // Ceiling
-  const ceilMat = new THREE.MeshStandardMaterial({color:0xf0f2f5,roughness:0.4});
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(32,32),ceilMat);
-  ceil.rotation.x = Math.PI/2;
-  ceil.position.y = 3;
+  const ceilMat = new THREE.MeshStandardMaterial({color:0xf0f2f5,roughness:0.35});
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(34,34),ceilMat);
+  ceil.rotation.x = Math.PI/2; ceil.position.y = 3;
   scene.add(ceil);
 
-  // Ceiling tiles grid
-  const ctGeo = new THREE.BoxGeometry(1.95,0.04,1.95);
-  const ctMat = new THREE.MeshStandardMaterial({color:0xe8eaec,roughness:0.5});
+  // Ceiling tiles
+  const ctMat = new THREE.MeshStandardMaterial({color:0xe6e8eb,roughness:0.45});
   for(let x=-7;x<=7;x+=2) for(let z=-7;z<=7;z+=2){
-    const ct=new THREE.Mesh(ctGeo,ctMat);
-    ct.position.set(x,2.88,z);
-    scene.add(ct);
+    const ct=new THREE.Mesh(new THREE.BoxGeometry(1.92,0.04,1.92),ctMat);
+    ct.position.set(x,2.9,z); scene.add(ct);
   }
 
-  // Windows – exterior blue glow
-  const winMat = new THREE.MeshStandardMaterial({color:0x87ceeb,transparent:true,opacity:0.55,roughness:0.1,metalness:0.8,emissive:0x2266aa,emissiveIntensity:0.4});
-  const winPositions=[[15.85,1.5,-6],[15.85,1.5,0],[15.85,1.5,6]];
-  winPositions.forEach(([x,y,z])=>{
-    const w=new THREE.Mesh(new THREE.BoxGeometry(0.15,1.6,1.8),winMat);
-    w.position.set(x,y,z);
-    scene.add(w);
-    const wl=new THREE.PointLight(0x4488ff,0.3,6);
-    wl.position.set(x-1,y,z);
-    scene.add(wl);
+  // Windows (right wall)
+  const winMat = new THREE.MeshStandardMaterial({
+    color:0x8fc8f8, transparent:true, opacity:0.5,
+    roughness:0.05, metalness:0.9,
+    emissive:0x3366cc, emissiveIntensity:0.5
+  });
+  [[15.9,1.5,-6],[15.9,1.5,0],[15.9,1.5,6]].forEach(([x,y,z])=>{
+    const w=new THREE.Mesh(new THREE.BoxGeometry(0.14,1.7,1.9),winMat);
+    w.position.set(x,y,z); scene.add(w);
+    // Window frame
+    const frameMat=new THREE.MeshStandardMaterial({color:0x8899aa,roughness:0.3,metalness:0.5});
+    const frame=new THREE.Mesh(new THREE.BoxGeometry(0.12,1.8,0.06),frameMat);
+    frame.position.set(x,y,z-0.97); scene.add(frame);
+    const frame2=frame.clone();
+    frame2.position.z=z+0.97; scene.add(frame2);
   });
 
-  // Interior divider walls
-  const divMat = new THREE.MeshStandardMaterial({color:0xbbc5cf,roughness:0.6});
-  const dividers=[
-    {pos:[-1.5,1.2,-3.5],w:3,h:2.4,d:0.15},
-    {pos:[1.5,1.2,-3.5],w:0.15,h:2.4,d:3},
-    {pos:[-4,1.2,1],w:0.15,h:2.4,d:5},
-    {pos:[4,1.2,1],w:0.15,h:2.4,d:5},
-  ];
-  dividers.forEach(({pos,w,h,d})=>{
+  // Interior dividers
+  const divMat = new THREE.MeshStandardMaterial({color:0xb8c4ce,roughness:0.55});
+  [
+    {pos:[-1.5,1.2,-3.5],w:3,h:2.4,d:0.14},
+    {pos:[1.5,1.2,-3.5],w:0.14,h:2.4,d:3},
+    {pos:[-4,1.2,1],w:0.14,h:2.4,d:5},
+    {pos:[4,1.2,1],w:0.14,h:2.4,d:5},
+  ].forEach(({pos,w,h,d})=>{
     const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),divMat);
-    m.position.set(...pos);
-    m.castShadow=true;
-    m.receiveShadow=true;
-    scene.add(m);
+    m.position.set(...pos); m.castShadow=true; m.receiveShadow=true; scene.add(m);
   });
 
   buildFurniture();
@@ -548,60 +1059,96 @@ function buildScene(){
 }
 
 function buildFurniture(){
-  const deskMat = new THREE.MeshStandardMaterial({color:0x7c5c3e,roughness:0.5});
-  const deskTopMat = new THREE.MeshStandardMaterial({color:0x9a7351,roughness:0.4});
-  const chairMat = new THREE.MeshStandardMaterial({color:0x223344,roughness:0.5,metalness:0.1});
-  const screenMat = new THREE.MeshStandardMaterial({color:0x111827,roughness:0.2,metalness:0.5});
-  const screenGlowMat = new THREE.MeshStandardMaterial({color:0x1a3a6b,emissive:0x2244aa,emissiveIntensity:0.6,roughness:0.1});
+  const deskMat = new THREE.MeshStandardMaterial({map:deskTex,roughness:0.45,metalness:0.05});
+  const deskTopMat = new THREE.MeshStandardMaterial({color:0x9a7351,roughness:0.38,metalness:0.05});
+  const chairMat = new THREE.MeshStandardMaterial({color:0x1e2e3e,roughness:0.5,metalness:0.08});
+  const screenMat = new THREE.MeshStandardMaterial({color:0x0d1520,roughness:0.15,metalness:0.6});
+  const screenGlowMat = new THREE.MeshStandardMaterial({
+    color:0x1a3a6b, emissive:0x2244aa, emissiveIntensity:0.9, roughness:0.08, metalness:0.2
+  });
+  const keyMat = new THREE.MeshStandardMaterial({color:0x2a3240,roughness:0.38,metalness:0.12});
 
   NPC_DATA.forEach(npc=>{
     const {x,z} = npc.position;
     const grp = new THREE.Group();
 
-    // Desk – legs
-    const legGeo = new THREE.BoxGeometry(0.06,0.73,0.06);
-    [[-0.65,-0.35,-0.45],[0.65,-0.35,-0.45],[-0.65,-0.35,0.45],[0.65,-0.35,0.45]].forEach(([lx,ly,lz])=>{
-      const leg=new THREE.Mesh(legGeo,deskMat);
-      leg.position.set(lx,ly,lz);
-      leg.castShadow=true;
-      grp.add(leg);
+    // Desk legs (4)
+    const legGeo = new THREE.BoxGeometry(0.055,0.72,0.055);
+    [[-0.65,-0.35,-0.44],[0.65,-0.35,-0.44],[-0.65,-0.35,0.44],[0.65,-0.35,0.44]].forEach(([lx,ly,lz])=>{
+      const leg=new THREE.Mesh(legGeo,deskMat); leg.position.set(lx,ly,lz); leg.castShadow=true; grp.add(leg);
     });
-    // Desk – top
-    const top=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.07,0.95),deskTopMat);
-    top.castShadow=true; top.receiveShadow=true;
-    grp.add(top);
+    // Cross-bar
+    const bar=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.04,0.04),deskMat);
+    bar.position.set(0,-0.35,0); grp.add(bar);
 
-    // Monitor
-    const monBase=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.04,0.22),screenMat);
-    monBase.position.set(0.05,0.07,-0.2);
-    grp.add(monBase);
-    const monStand=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.3,0.04),screenMat);
-    monStand.position.set(0.05,0.22,-0.2);
-    grp.add(monStand);
-    const monScreen=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.38,0.04),screenGlowMat);
+    // Desk surface
+    const top=new THREE.Mesh(new THREE.BoxGeometry(1.55,0.065,1.0),deskTopMat);
+    top.castShadow=true; top.receiveShadow=true; grp.add(top);
+
+    // Desk edge trim
+    const edgeMat=new THREE.MeshStandardMaterial({color:0x6a4a2e,roughness:0.5,metalness:0.1});
+    const edgeGeo=new THREE.BoxGeometry(1.56,0.018,0.02);
+    const edge=new THREE.Mesh(edgeGeo,edgeMat); edge.position.set(0,-0.04,0.49); grp.add(edge);
+
+    // Monitor assembly
     const neckBad = npc.posture.neck>20;
-    monScreen.position.set(0.05, neckBad ? 0.28 : 0.42,-0.2); // bad = screen too low
-    grp.add(monScreen);
+    const monBase=new THREE.Mesh(new THREE.BoxGeometry(0.24,0.038,0.24),screenMat);
+    monBase.position.set(0.05,0.072,-0.22); grp.add(monBase);
+    const monStand=new THREE.Mesh(new THREE.BoxGeometry(0.038,0.32,0.038),screenMat);
+    monStand.position.set(0.05,0.23,-0.22); grp.add(monStand);
+    // Curved-look monitor (slightly thicker in center)
+    const monScreen=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.38,0.04),screenGlowMat);
+    monScreen.position.set(0.05, neckBad?0.28:0.43, -0.22); grp.add(monScreen);
+    // Screen bezel
+    const bezelMat=new THREE.MeshStandardMaterial({color:0x0d0d0d,roughness:0.3,metalness:0.5});
+    const bezel=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.40,0.02),bezelMat);
+    bezel.position.set(0.05, neckBad?0.28:0.43,-0.235); grp.add(bezel);
+
+    // Small monitor light (glow)
+    const monLight=new THREE.PointLight(0x2244aa,0.3,1.5);
+    monLight.position.set(0.05, neckBad?0.28:0.43, -0.1); grp.add(monLight);
 
     // Keyboard
-    const keyGeo=new THREE.BoxGeometry(0.42,0.015,0.16);
-    const keyMat=new THREE.MeshStandardMaterial({color:0x303848,roughness:0.4});
-    const key=new THREE.Mesh(keyGeo,keyMat);
-    key.position.set(0.05,0.045,0.2);
-    key.rotation.x = npc.posture.wrist>15 ? -0.1 : 0; // slight wrist angle
-    grp.add(key);
+    const key=new THREE.Mesh(new THREE.BoxGeometry(0.44,0.014,0.17),keyMat);
+    key.position.set(0.05,0.045,0.22);
+    key.rotation.x = npc.posture.wrist>15 ? -0.1 : 0; grp.add(key);
 
-    // Chair
-    const seat=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.08,0.5),chairMat);
-    seat.position.set(0,-0.4,0.55);
-    seat.castShadow=true;
-    grp.add(seat);
-    const back=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.42,0.07),chairMat);
-    const spineBad = npc.posture.spine>15;
+    // Mouse
+    const mouseMat=new THREE.MeshStandardMaterial({color:0x3a4250,roughness:0.4,metalness:0.2});
+    const mouse=new THREE.Mesh(new THREE.BoxGeometry(0.062,0.03,0.1),mouseMat);
+    mouse.position.set(0.38,0.04,0.22); grp.add(mouse);
+
+    // Papers/items on desk
+    const paperMat=new THREE.MeshStandardMaterial({color:0xf5f5ee,roughness:0.85});
+    const paper=new THREE.Mesh(new THREE.BoxGeometry(0.24,0.005,0.18),paperMat);
+    paper.position.set(-0.35,0.037,0.1); grp.add(paper);
+
+    // Chair (improved)
+    const spineBad=npc.posture.spine>15;
+    // Chair base (5 spokes)
+    const chairBase=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.04,5),new THREE.MeshStandardMaterial({color:0x111111,roughness:0.5,metalness:0.4}));
+    chairBase.position.set(0,-0.72,0.55); grp.add(chairBase);
+    // Chair pole
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.28,8),new THREE.MeshStandardMaterial({color:0x222222,roughness:0.3,metalness:0.6}));
+    pole.position.set(0,-0.55,0.55); grp.add(pole);
+    // Seat cushion
+    const seat=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.085,0.5),chairMat);
+    seat.position.set(0,-0.39,0.55); seat.castShadow=true; grp.add(seat);
+    // Backrest
+    const backMat=new THREE.MeshStandardMaterial({color:0x1e2e3e,roughness:0.5});
+    const back=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.46,0.07),backMat);
     back.position.set(0,-0.18,0.31);
-    back.rotation.x = spineBad ? 0.25 : 0.05; // bad = tilted back
-    back.castShadow=true;
-    grp.add(back);
+    back.rotation.x=spineBad?0.28:0.06; back.castShadow=true; grp.add(back);
+    // Lumbar support bump
+    const lumbar=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.12,0.05),new THREE.MeshStandardMaterial({color:0x182636,roughness:0.5}));
+    lumbar.position.set(0,-0.3,0.28); lumbar.rotation.x=spineBad?0.28:0.06; grp.add(lumbar);
+    // Armrests
+    [[-0.28,0],[0.28,0]].forEach(([ax])=>{
+      const arm=new THREE.Mesh(new THREE.BoxGeometry(0.055,0.18,0.055),new THREE.MeshStandardMaterial({color:0x222222,roughness:0.3,metalness:0.5}));
+      arm.position.set(ax,-0.28,0.5); grp.add(arm);
+      const pad=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.025,0.16),chairMat);
+      pad.position.set(ax,-0.19,0.5); grp.add(pad);
+    });
 
     grp.position.set(x,0.73,z);
     scene.add(grp);
@@ -610,278 +1157,294 @@ function buildFurniture(){
 
 function buildDecorations(){
   // Plants
-  const potMat = new THREE.MeshStandardMaterial({color:0x7a4e2d,roughness:0.8});
-  const leafMat = new THREE.MeshStandardMaterial({color:0x2d7a3d,roughness:0.6});
-  const plantPos=[[-13,-13],[13,-13],[-13,13],[13,13],[-9,0],[9,0]];
-  plantPos.forEach(([x,z])=>{
+  const potMat=new THREE.MeshStandardMaterial({color:0x7a4e2d,roughness:0.82});
+  const leafMat=new THREE.MeshStandardMaterial({color:0x256830,roughness:0.6});
+  const leafLightMat=new THREE.MeshStandardMaterial({color:0x2d8840,roughness:0.55});
+  [[-13,-13],[13,-13],[-13,13],[13,13],[-10,0],[10,0]].forEach(([x,z])=>{
     const grp=new THREE.Group();
-    const pot=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.14,0.3,8),potMat);
-    pot.position.y=0.15;
-    grp.add(pot);
-    // Leaves – 3 cones
+    // Pot
+    const pot=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.15,0.32,10),potMat);
+    pot.position.y=0.16; grp.add(pot);
+    // Soil
+    const soil=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.04,10),new THREE.MeshStandardMaterial({color:0x3a2010,roughness:0.95}));
+    soil.position.y=0.33; grp.add(soil);
+    // Foliage layers
     for(let i=0;i<3;i++){
-      const h=0.35+i*0.18;
-      const r=0.22-i*0.04;
-      const leaf=new THREE.Mesh(new THREE.ConeGeometry(r,h,7),leafMat);
-      leaf.position.set(0,0.3+i*0.25,0);
-      leaf.castShadow=true;
-      grp.add(leaf);
+      const h=0.38+i*0.2; const r=0.24-i*0.05;
+      const leaf=new THREE.Mesh(new THREE.ConeGeometry(r,h,8),i%2===0?leafMat:leafLightMat);
+      leaf.position.set(0,0.35+i*0.28,0); leaf.castShadow=true; grp.add(leaf);
     }
-    grp.position.set(x,0,z);
-    scene.add(grp);
+    grp.position.set(x,0,z); scene.add(grp);
   });
 
   // Whiteboard
-  const wbFrame = new THREE.Mesh(new THREE.BoxGeometry(3,1.4,0.07),new THREE.MeshStandardMaterial({color:0x555,roughness:0.4,metalness:0.6}));
-  wbFrame.position.set(-8,1.5,-15.8);
-  scene.add(wbFrame);
-  const wbBoard = new THREE.Mesh(new THREE.BoxGeometry(2.8,1.2,0.02),new THREE.MeshStandardMaterial({color:0xfafafa,roughness:0.2}));
-  wbBoard.position.set(-8,1.5,-15.75);
-  scene.add(wbBoard);
+  const wbFr=new THREE.Mesh(new THREE.BoxGeometry(3.2,1.5,0.07),new THREE.MeshStandardMaterial({color:0x444444,roughness:0.35,metalness:0.6}));
+  wbFr.position.set(-8,1.5,-15.85); scene.add(wbFr);
+  const wbBd=new THREE.Mesh(new THREE.BoxGeometry(3.0,1.3,0.025),new THREE.MeshStandardMaterial({color:0xf8f9fa,roughness:0.15}));
+  wbBd.position.set(-8,1.5,-15.8); scene.add(wbBd);
 
-  // Reception counter
-  const counterMat = new THREE.MeshStandardMaterial({color:0x4a3a2a,roughness:0.5});
-  const counter = new THREE.Mesh(new THREE.BoxGeometry(3,1,0.7),counterMat);
-  counter.position.set(0,0.5,-13);
-  counter.castShadow=true;
-  scene.add(counter);
+  // Whiteboard tray
+  const tray=new THREE.Mesh(new THREE.BoxGeometry(3.0,0.06,0.1),new THREE.MeshStandardMaterial({color:0x333333,roughness:0.4,metalness:0.5}));
+  tray.position.set(-8,0.8,-15.79); scene.add(tray);
+
+  // Reception counter (improved)
+  const counterMat=new THREE.MeshStandardMaterial({color:0x4a3a2a,roughness:0.48,metalness:0.08});
+  const counter=new THREE.Mesh(new THREE.BoxGeometry(3.2,1.02,0.72),counterMat);
+  counter.position.set(0,0.51,-13); counter.castShadow=true; scene.add(counter);
+  // Counter top
+  const ctop=new THREE.Mesh(new THREE.BoxGeometry(3.3,0.06,0.82),new THREE.MeshStandardMaterial({color:0x2a1a0a,roughness:0.3,metalness:0.15}));
+  ctop.position.set(0,1.04,-13); ctop.castShadow=true; scene.add(ctop);
+
+  // Framed pictures on walls
+  const picColors=[0x3a5f8a,0x8a3a5f,0x5f8a3a];
+  [[-8,1.5,-15.4],[-14,1.5,-8],[-14,1.5,4]].forEach(([x,y,z],i)=>{
+    const frame=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.6,0.05),new THREE.MeshStandardMaterial({color:0x5a4a2a,roughness:0.5,metalness:0.3}));
+    frame.position.set(x,y,z+0.05);
+    if(z<-10){frame.rotation.y=0;}
+    else{frame.rotation.y=Math.PI/2;}
+    scene.add(frame);
+    const art=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.5,0.02),new THREE.MeshStandardMaterial({
+      color:picColors[i%3],roughness:0.4, emissive:new THREE.Color(picColors[i%3]).multiplyScalar(0.2)
+    }));
+    art.position.copy(frame.position);
+    if(z<-10){art.position.z+=0.035;}else{art.position.x+=0.035;}
+    art.rotation.copy(frame.rotation); scene.add(art);
+  });
+
+  // Coffee machine in corner
+  const coffeeMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.3,metalness:0.7});
+  const coffee=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.45,0.28),coffeeMat);
+  coffee.position.set(-13.5,0.22,-14.5); scene.add(coffee);
+  const coffeeGlow=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.05,0.02),new THREE.MeshStandardMaterial({
+    color:0xff3300,emissive:0xff2200,emissiveIntensity:1.5
+  }));
+  coffeeGlow.position.set(-13.5,0.32,-14.35); scene.add(coffeeGlow);
 }
 
 buildScene();
 
-// ═══════════════════════════════════════════════
-// NPC CREATION (improved humanoid shapes)
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// NPC CREATION
+// ══════════════════════════════════════════════════════
 const npcMeshes = [];
-
-function buildNPCColor(idx){
-  const colors=[0x4a7fc7,0xc74a7f,0x7fc74a,0xc7a34a,0x7f4ac7];
-  return colors[idx%colors.length];
-}
+const NPC_COLORS = [0x4a7fc7,0xc74a7f,0x7fc74a,0xc7a34a,0x7f4ac7];
+const HAIR_COLORS = [0x2c1a0e,0x4a3520,0x8B4513,0x1a1a1a,0x654321];
+const SKIN_TONES  = [0xf0c890,0xd4946a,0xe8bc80,0xf5d6a8,0xc07850];
 
 function createNPC(data, idx){
   const grp = new THREE.Group();
   grp.userData = {type:'npc', isNPC:true, npcData:data};
 
-  const bodyColor = buildNPCColor(idx);
-  const skinColor = 0xf0c890;
-  const hairColors=[0x2c1a0e,0x4a3520,0x8B4513,0x1a1a1a,0x654321];
+  const bc = NPC_COLORS[idx%NPC_COLORS.length];
+  const sc = SKIN_TONES[idx%SKIN_TONES.length];
+  const hc = HAIR_COLORS[idx%HAIR_COLORS.length];
 
-  const bodyMat = new THREE.MeshStandardMaterial({color:bodyColor,roughness:0.4,metalness:0.05});
-  const skinMat = new THREE.MeshStandardMaterial({color:skinColor,roughness:0.3,metalness:0.02});
-  const hairMat = new THREE.MeshStandardMaterial({color:hairColors[idx%hairColors.length],roughness:0.6});
-  const shoesMat = new THREE.MeshStandardMaterial({color:0x222222,roughness:0.7});
+  const bodyMat  = new THREE.MeshStandardMaterial({color:bc, roughness:0.45, metalness:0.05});
+  const skinMat  = new THREE.MeshStandardMaterial({color:sc, roughness:0.35, metalness:0.02});
+  const hairMat  = new THREE.MeshStandardMaterial({color:hc, roughness:0.65});
+  const shoesMat = new THREE.MeshStandardMaterial({color:0x1a1a1a, roughness:0.75});
+  const pantsMat = new THREE.MeshStandardMaterial({color:0x1e2840, roughness:0.55});
 
-  // Torso (with slight spine curve baked in)
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.42,0.55,0.24),bodyMat);
-  torso.position.set(0,0.77,0);
-  torso.rotation.x = (data.posture.spine/100)*0.22;
-  torso.castShadow=true;
-  grp.add(torso);
-
-  // Shoulders (wider at top)
-  const shoulderMat = new THREE.MeshStandardMaterial({color:bodyColor,roughness:0.4});
-  const shoulder = new THREE.Mesh(new THREE.BoxGeometry(0.55,0.12,0.22),shoulderMat);
-  shoulder.position.set(0,1.02,0);
-  grp.add(shoulder);
-
-  // Head – slightly more realistic with elongated sphere
-  const headGroup = new THREE.Group();
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.175,16,12),skinMat);
-  head.scale.y = 1.12;
-  head.castShadow=true;
-  headGroup.add(head);
-
-  // Neck offset based on posture
-  const neckLean = (data.posture.neck-15)*0.006;
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.18,12,8,0,Math.PI*2,0,Math.PI*0.55),hairMat);
-  hair.position.y = 0.05;
-  headGroup.add(hair);
-
-  // Face – subtle: 2 eyes
-  const eyeGeo = new THREE.SphereGeometry(0.025,6,6);
-  const eyeMat = new THREE.MeshStandardMaterial({color:0x111111});
-  const eyeL = new THREE.Mesh(eyeGeo,eyeMat);
-  eyeL.position.set(-0.065,0.02,0.165);
-  headGroup.add(eyeL);
-  const eyeR = eyeL.clone();
-  eyeR.position.x = 0.065;
-  headGroup.add(eyeR);
-
-  // Expression based on health
-  if(!data.healthy){
-    // Frown brows
-    const browGeo = new THREE.BoxGeometry(0.07,0.012,0.02);
-    const browMat = new THREE.MeshStandardMaterial({color:hairColors[idx%hairColors.length]});
-    const browL = new THREE.Mesh(browGeo,browMat);
-    browL.position.set(-0.065,0.07,0.163);
-    browL.rotation.z = 0.25;
-    headGroup.add(browL);
-    const browR = browL.clone();
-    browR.position.x = 0.065;
-    browR.rotation.z = -0.25;
-    headGroup.add(browR);
-  }
-
-  headGroup.position.set(neckLean,1.18+neckLean*0.3,0);
-  headGroup.userData={bodyPart:'head'};
-  grp.add(headGroup);
-
-  // Neck
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.065,0.075,0.1,8),skinMat);
-  neck.position.set(neckLean,1.08,0);
-  neck.userData={bodyPart:'neck'};
-  grp.add(neck);
-
-  // Arms
-  const armGeo = new THREE.BoxGeometry(0.1,0.45,0.1);
-  const forearmGeo = new THREE.BoxGeometry(0.09,0.35,0.09);
-  const handGeo = new THREE.SphereGeometry(0.06,8,6);
-
+  const spineAngle = (data.posture.spine/100)*0.24;
+  const neckOffset = (data.posture.neck-15)*0.006;
   const elbowFactor = (data.posture.elbow-90)/90;
 
-  const leftArm = new THREE.Group();
-  const laUpper = new THREE.Mesh(armGeo,bodyMat);
-  laUpper.position.set(0,-0.22,0);
-  laUpper.castShadow=true;
-  leftArm.add(laUpper);
-  const laFore = new THREE.Mesh(forearmGeo,skinMat);
-  laFore.position.set(0.05,-0.55,0.12);
-  laFore.rotation.x=-0.4-elbowFactor*0.2;
-  leftArm.add(laFore);
-  const laHand = new THREE.Mesh(handGeo,skinMat);
-  laHand.position.set(0.08,-0.72,0.2);
-  laHand.userData={bodyPart:'wrist_left'};
-  leftArm.add(laHand);
-  leftArm.position.set(-0.27,1.0,0);
-  leftArm.userData={bodyPart:'arm_left'};
-  grp.add(leftArm);
+  // Torso
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(0.44,0.56,0.24),bodyMat);
+  torso.position.set(0,0.77,0);
+  torso.rotation.x = spineAngle;
+  torso.castShadow=true; grp.add(torso);
 
-  const rightArm = new THREE.Group();
-  const raUpper = new THREE.Mesh(armGeo,bodyMat);
-  raUpper.position.set(0,-0.22,0);
-  raUpper.castShadow=true;
-  rightArm.add(raUpper);
-  const raFore = new THREE.Mesh(forearmGeo,skinMat);
-  raFore.position.set(-0.05,-0.55,0.12);
-  raFore.rotation.x=-0.4-elbowFactor*0.2;
-  rightArm.add(raFore);
-  const raHand = new THREE.Mesh(handGeo,skinMat);
-  raHand.position.set(-0.08,-0.72,0.2);
-  raHand.userData={bodyPart:'wrist_right'};
-  rightArm.add(raHand);
-  rightArm.position.set(0.27,1.0,0);
-  rightArm.userData={bodyPart:'arm_right'};
-  grp.add(rightArm);
+  // Collar/shirt detail
+  const collarMat=new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:0.5});
+  const collar=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.12,0.04),collarMat);
+  collar.position.set(0,0.98,0.12); grp.add(collar);
 
-  // Lower body / legs (seated, simplified)
-  const legMat = new THREE.MeshStandardMaterial({color:bodyColor,roughness:0.5});
-  const thighGeo = new THREE.BoxGeometry(0.17,0.1,0.45);
-  const lLeg=new THREE.Mesh(thighGeo,legMat);
-  lLeg.position.set(-0.11,0.34,0.2);
-  lLeg.castShadow=true;
-  grp.add(lLeg);
-  const rLeg=new THREE.Mesh(thighGeo,legMat);
-  rLeg.position.set(0.11,0.34,0.2);
-  rLeg.castShadow=true;
-  grp.add(rLeg);
+  // Shoulders
+  const shoulderMat=new THREE.MeshStandardMaterial({color:bc,roughness:0.42});
+  const shoulder=new THREE.Mesh(new THREE.BoxGeometry(0.56,0.11,0.23),shoulderMat);
+  shoulder.position.set(0,1.03,0); grp.add(shoulder);
 
-  // Shoes
-  const shoeGeo = new THREE.BoxGeometry(0.13,0.08,0.26);
-  const lShoe=new THREE.Mesh(shoeGeo,shoesMat);
-  lShoe.position.set(-0.11,0.04,0.42);
-  grp.add(lShoe);
-  const rShoe=new THREE.Mesh(shoeGeo,shoesMat);
-  rShoe.position.set(0.11,0.04,0.42);
-  grp.add(rShoe);
+  // Head group
+  const headGrp=new THREE.Group();
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.178,16,14),skinMat);
+  head.scale.y=1.1; head.castShadow=true; headGrp.add(head);
 
-  // Name label (floating)
-  const labelCanvas = document.createElement('canvas');
-  labelCanvas.width=256; labelCanvas.height=64;
-  const ctx=labelCanvas.getContext('2d');
-  ctx.fillStyle='rgba(5,13,20,0.85)';
-  ctx.roundRect(4,4,248,56,12);
-  ctx.fill();
-  ctx.strokeStyle='rgba(0,212,200,0.5)';
-  ctx.lineWidth=1;
-  ctx.roundRect(4,4,248,56,12);
-  ctx.stroke();
-  ctx.fillStyle='#ffffff';
-  ctx.font='bold 18px Segoe UI';
-  ctx.textAlign='center';
-  ctx.fillText(data.name,128,28);
-  ctx.fillStyle='rgba(0,212,200,0.8)';
-  ctx.font='13px Segoe UI';
-  ctx.fillText(data.role,128,48);
-  const lblTex = new THREE.CanvasTexture(labelCanvas);
-  const lblMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.9,0.22),
-    new THREE.MeshBasicMaterial({map:lblTex,transparent:true,depthWrite:false})
-  );
-  lblMesh.position.set(0,1.55,0);
-  lblMesh.userData={isLabel:true};
-  grp.add(lblMesh);
+  // Hair
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(0.185,14,10,0,Math.PI*2,0,Math.PI*0.52),hairMat);
+  hair.position.y=0.04; headGrp.add(hair);
+  // Sideburns
+  const sideGeo=new THREE.BoxGeometry(0.07,0.1,0.04);
+  [-1,1].forEach(s=>{
+    const sb=new THREE.Mesh(sideGeo,hairMat);
+    sb.position.set(s*0.16,-0.06,0.06); headGrp.add(sb);
+  });
 
-  // Pain indicator (red pulsing ring above head if unhealthy)
+  // Eyes
+  const eyeGeo=new THREE.SphereGeometry(0.026,8,8);
+  const eyeMat=new THREE.MeshStandardMaterial({color:0x111111});
+  const whites=new THREE.MeshStandardMaterial({color:0xfafafa,roughness:0.5});
+  [-0.068,0.068].forEach(ex=>{
+    const white=new THREE.Mesh(new THREE.SphereGeometry(0.04,8,8),whites);
+    white.position.set(ex,0.025,0.155); white.scale.z=0.65; headGrp.add(white);
+    const pupil=new THREE.Mesh(eyeGeo,eyeMat);
+    pupil.position.set(ex,0.025,0.17); headGrp.add(pupil);
+  });
+
+  // Eyebrows (angled if unhealthy)
   if(!data.healthy){
-    const ringGeo = new THREE.TorusGeometry(0.15,0.015,6,16);
-    const ringMat = new THREE.MeshBasicMaterial({color:0xff3333,transparent:true,opacity:0.8});
-    const ring = new THREE.Mesh(ringGeo,ringMat);
-    ring.position.set(0,1.75,0);
-    ring.userData={isPainRing:true, baseY:1.75};
-    grp.add(ring);
+    const browGeo=new THREE.BoxGeometry(0.07,0.012,0.02);
+    const browMat=new THREE.MeshStandardMaterial({color:hc});
+    [-0.068,0.068].forEach((bx,bi)=>{
+      const brow=new THREE.Mesh(browGeo,browMat);
+      brow.position.set(bx,0.08,0.162);
+      brow.rotation.z = bi===0 ? 0.3 : -0.3;
+      headGrp.add(brow);
+    });
+  }
+
+  // Nose
+  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.022,6,6),skinMat);
+  nose.position.set(0,-0.01,0.172); nose.scale.z=1.5; headGrp.add(nose);
+
+  // Mouth (frown if unhealthy)
+  const mouthMat=new THREE.MeshStandardMaterial({color:0x883322,roughness:0.5});
+  const mouth=new THREE.Mesh(new THREE.BoxGeometry(0.055,0.013,0.015),mouthMat);
+  mouth.position.set(0,-0.072,0.165);
+  mouth.rotation.z = data.healthy ? 0.2 : -0.2;
+  headGrp.add(mouth);
+
+  headGrp.position.set(neckOffset, 1.18+neckOffset*0.3, 0);
+  headGrp.userData={bodyPart:'head'}; grp.add(headGrp);
+
+  // Neck
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.068,0.078,0.1,10),skinMat);
+  neck.position.set(neckOffset,1.09,0);
+  neck.userData={bodyPart:'neck'}; grp.add(neck);
+
+  // Arms (left)
+  const leftArm=new THREE.Group();
+  const laUp=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.45,0.11),bodyMat);
+  laUp.position.set(0,-0.21,0); laUp.castShadow=true; leftArm.add(laUp);
+  const laFore=new THREE.Mesh(new THREE.BoxGeometry(0.092,0.35,0.092),skinMat);
+  laFore.position.set(0.055,-0.56,0.13);
+  laFore.rotation.x=-0.4-elbowFactor*0.22; leftArm.add(laFore);
+  const laHand=new THREE.Mesh(new THREE.SphereGeometry(0.062,8,8),skinMat);
+  laHand.position.set(0.085,-0.73,0.21); laHand.userData={bodyPart:'wrist_left'}; leftArm.add(laHand);
+  leftArm.position.set(-0.28,1.01,0);
+  leftArm.userData={bodyPart:'arm_left'}; grp.add(leftArm);
+
+  // Arms (right)
+  const rightArm=new THREE.Group();
+  const raUp=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.45,0.11),bodyMat);
+  raUp.position.set(0,-0.21,0); raUp.castShadow=true; rightArm.add(raUp);
+  const raFore=new THREE.Mesh(new THREE.BoxGeometry(0.092,0.35,0.092),skinMat);
+  raFore.position.set(-0.055,-0.56,0.13);
+  raFore.rotation.x=-0.4-elbowFactor*0.22; rightArm.add(raFore);
+  const raHand=new THREE.Mesh(new THREE.SphereGeometry(0.062,8,8),skinMat);
+  raHand.position.set(-0.085,-0.73,0.21); raHand.userData={bodyPart:'wrist_right'}; rightArm.add(raHand);
+  rightArm.position.set(0.28,1.01,0);
+  rightArm.userData={bodyPart:'arm_right'}; grp.add(rightArm);
+
+  // Legs (seated - thighs visible)
+  const thighGeo=new THREE.BoxGeometry(0.17,0.095,0.46);
+  [-0.11,0.11].forEach(lx=>{
+    const th=new THREE.Mesh(thighGeo,pantsMat);
+    th.position.set(lx,0.34,0.21); th.castShadow=true; grp.add(th);
+    // Calves (going down)
+    const calf=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.38,0.12),pantsMat);
+    calf.position.set(lx,0.08,0.45); grp.add(calf);
+    const shoe=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.075,0.28),shoesMat);
+    shoe.position.set(lx,-0.08,0.48); grp.add(shoe);
+  });
+
+  // Belt
+  const belt=new THREE.Mesh(new THREE.BoxGeometry(0.44,0.04,0.24),new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:0.4,metalness:0.5}));
+  belt.position.set(0,0.5,0); grp.add(belt);
+
+  // Name label
+  const lc=document.createElement('canvas'); lc.width=280; lc.height=70;
+  const lctx=lc.getContext('2d');
+  lctx.fillStyle='rgba(5,13,20,0.88)';
+  lctx.roundRect(3,3,274,64,14); lctx.fill();
+  lctx.strokeStyle='rgba(0,212,200,0.55)'; lctx.lineWidth=1;
+  lctx.roundRect(3,3,274,64,14); lctx.stroke();
+  lctx.fillStyle='#ffffff'; lctx.font='bold 17px Segoe UI'; lctx.textAlign='center';
+  lctx.fillText(data.name,140,28);
+  lctx.fillStyle='rgba(0,212,200,0.85)'; lctx.font='13px Segoe UI';
+  lctx.fillText(data.role,140,50);
+  const lblTex=new THREE.CanvasTexture(lc);
+  const lbl=new THREE.Mesh(
+    new THREE.PlaneGeometry(0.95,0.24),
+    new THREE.MeshBasicMaterial({map:lblTex,transparent:true,depthWrite:false,side:THREE.DoubleSide})
+  );
+  lbl.position.set(0,1.6,0); lbl.userData={isLabel:true}; grp.add(lbl);
+
+  // Pain ring (unhealthy NPCs)
+  if(!data.healthy){
+    const ringGeo=new THREE.TorusGeometry(0.16,0.016,8,20);
+    const ringMat=new THREE.MeshBasicMaterial({color:0xff2222,transparent:true,opacity:0.9});
+    const ring=new THREE.Mesh(ringGeo,ringMat);
+    ring.position.set(0,1.78,0);
+    ring.userData={isPainRing:true,baseY:1.78}; grp.add(ring);
   }
 
   grp.position.set(data.position.x, 0, data.position.z);
-  // Face the desk
-  grp.rotation.y = Math.atan2(-(0 - data.position.x), -(0 - data.position.z)) + Math.PI;
+  grp.rotation.y = Math.atan2(-(0-data.position.x),-(0-data.position.z))+Math.PI;
 
-  scene.add(grp);
-  npcMeshes.push(grp);
+  scene.add(grp); npcMeshes.push(grp);
   return grp;
 }
 
-NPC_DATA.forEach((data,i) => createNPC(data,i));
+NPC_DATA.forEach((d,i)=>createNPC(d,i));
 
-// ═══════════════════════════════════════════════
-// PLAYER CONTROLLER (pointer lock FPS)
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// PLAYER CONTROLLER
+// ══════════════════════════════════════════════════════
 const keys={};
-const euler = new THREE.Euler(0,0,0,'YXZ');
-const moveVec = new THREE.Vector3();
-const camSpeed = 5.0;
+const euler=new THREE.Euler(0,0,0,'YXZ');
+const moveVec=new THREE.Vector3();
+const camSpeed=4.8;
 let yaw=0, pitch=0;
 
 document.addEventListener('keydown', e=>{
   keys[e.code]=true;
   if(!state.gameStarted) return;
+  if(state.tutorialOpen) return;
   if(e.code==='KeyQ') toggleScanner();
   if(e.code==='KeyB') toggleShop();
   if(e.code==='KeyE') tryInteract();
-  if(e.code==='Escape' && state.shopOpen) closeShop();
+  if(e.code==='KeyR') toggleErgoPanel();
+  if(e.code==='KeyT') toggleStatsPanel();
+  if(e.code==='Escape'){
+    if(state.shopOpen) closeShop();
+    if(state.ergoOpen) closeErgoPanel();
+    if(state.statsOpen) closeStatsPanel();
+  }
 });
 document.addEventListener('keyup', e=>{ keys[e.code]=false; });
 
-canvas.addEventListener('click', ()=>{
+canvas.addEventListener('click',()=>{
   if(!state.gameStarted) return;
   if(!state.isLocked) canvas.requestPointerLock();
+  SoundManager.resume();
 });
 
-document.addEventListener('pointerlockchange', ()=>{
-  state.isLocked = (document.pointerLockElement===canvas);
-  document.getElementById('click-overlay').classList.toggle('hidden', state.isLocked);
+document.addEventListener('pointerlockchange',()=>{
+  state.isLocked=(document.pointerLockElement===canvas);
+  document.getElementById('click-overlay').classList.toggle('hidden',state.isLocked);
 });
 
-document.addEventListener('mousemove', e=>{
+document.addEventListener('mousemove',e=>{
   if(!state.isLocked) return;
-  yaw -= e.movementX * 0.0018;
-  pitch -= e.movementY * 0.0018;
-  pitch = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.5, pitch));
+  yaw-=e.movementX*0.0017;
+  pitch-=e.movementY*0.0017;
+  pitch=Math.max(-Math.PI/2.2,Math.min(Math.PI/2.5,pitch));
 });
 
 function updatePlayer(dt){
-  if(!state.isLocked || !state.gameStarted) return;
-  const speed = keys['ShiftLeft']||keys['ShiftRight'] ? camSpeed*1.8 : camSpeed;
+  if(!state.isLocked||!state.gameStarted) return;
+  const speed=keys['ShiftLeft']||keys['ShiftRight']?camSpeed*1.7:camSpeed;
   moveVec.set(0,0,0);
   if(keys['KeyW']||keys['ArrowUp']) moveVec.z-=1;
   if(keys['KeyS']||keys['ArrowDown']) moveVec.z+=1;
@@ -889,124 +1452,123 @@ function updatePlayer(dt){
   if(keys['KeyD']||keys['ArrowRight']) moveVec.x+=1;
   if(moveVec.length()>0) moveVec.normalize();
   moveVec.multiplyScalar(speed*dt);
-  camera.position.x += moveVec.x*Math.cos(yaw)-moveVec.z*Math.sin(yaw);
-  camera.position.z += moveVec.x*Math.sin(yaw)+moveVec.z*Math.cos(yaw);
-  // Clamp to room
-  camera.position.x = Math.max(-14, Math.min(14, camera.position.x));
-  camera.position.z = Math.max(-14, Math.min(14, camera.position.z));
-  camera.position.y = 1.65;
+  camera.position.x+=moveVec.x*Math.cos(yaw)-moveVec.z*Math.sin(yaw);
+  camera.position.z+=moveVec.x*Math.sin(yaw)+moveVec.z*Math.cos(yaw);
+  camera.position.x=Math.max(-14.5,Math.min(14.5,camera.position.x));
+  camera.position.z=Math.max(-14.5,Math.min(14.5,camera.position.z));
+  camera.position.y=1.65;
   euler.set(pitch,yaw,0,'YXZ');
   camera.quaternion.setFromEuler(euler);
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // SCANNER SYSTEM
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 function toggleScanner(){
-  state.scannerActive = !state.scannerActive;
-  const overlay = document.getElementById('scanner-overlay');
-  const status = document.getElementById('scanner-status');
-  const diag = document.getElementById('diagnostic');
+  state.scannerActive=!state.scannerActive;
+  const ov=document.getElementById('scanner-overlay');
+  const st=document.getElementById('scanner-status');
+  const dg=document.getElementById('diagnostic');
+  const xh=document.getElementById('xhair');
   if(state.scannerActive){
-    overlay.classList.add('active');
-    status.textContent='ESCÁNER: ACTIVO';
-    status.classList.add('active-status');
-    diag.classList.add('visible');
+    ov.classList.add('active'); st.textContent='ESCÁNER: ACTIVO';
+    st.classList.add('active-status'); dg.classList.add('visible');
+    xh.classList.add('scanning');
     showNotif('Escáner postural activado. Apunta a un empleado.','info');
+    SoundManager.playScanner();
   } else {
-    overlay.classList.remove('active');
-    status.textContent='ESCÁNER: INACTIVO';
-    status.classList.remove('active-status');
-    diag.classList.remove('visible');
+    ov.classList.remove('active'); st.textContent='ESCÁNER: INACTIVO';
+    st.classList.remove('active-status'); dg.classList.remove('visible');
+    xh.classList.remove('scanning');
     clearNPCHighlights();
     document.getElementById('npc-card').classList.remove('visible');
-    state.selectedNPC=null;
+    state.selectedNPC=null; lastScannedId=null;
   }
 }
 
 let lastScannedId=null;
 function updateScanner(){
-  if(!state.scannerActive || !state.gameStarted) return;
+  if(!state.scannerActive||!state.gameStarted) return;
   raycaster.setFromCamera(center,camera);
-  const hits = raycaster.intersectObjects(npcMeshes, true);
+  const hits=raycaster.intersectObjects(npcMeshes,true);
   let foundNPC=null;
   for(const h of hits){
     let obj=h.object;
-    while(obj.parent){
-      if(obj.userData?.isNPC) { foundNPC=obj; break; }
-      obj=obj.parent;
-    }
+    while(obj.parent){ if(obj.userData?.isNPC){foundNPC=obj;break;} obj=obj.parent; }
     if(foundNPC) break;
   }
-
   if(foundNPC){
-    const dist = camera.position.distanceTo(foundNPC.position);
-    if(dist > 9){
+    const dist=camera.position.distanceTo(foundNPC.position);
+    if(dist>9){
       updateDiagnosticEmpty();
       document.getElementById('scanner-status').textContent='ESCÁNER: FUERA DE RANGO';
       return;
     }
-    const npcData=foundNPC.userData.npcData;
-    if(npcData.id!==lastScannedId){
-      lastScannedId=npcData.id;
-      state.scannedNPCs.add(npcData.id);
-      highlightNPC(foundNPC, npcData);
-      updateDiagnosticUI(npcData);
-      showNPCCard(npcData);
-      checkEmailTrigger('scan', state.scannedNPCs.size);
+    const nd=foundNPC.userData.npcData;
+    if(nd.id!==lastScannedId){
+      lastScannedId=nd.id;
+      const firstScan=!state.scannedNPCs.has(nd.id);
+      state.scannedNPCs.add(nd.id);
+      highlightNPC(foundNPC,nd);
+      updateDiagnosticUI(nd);
+      showNPCCard(nd);
+      if(firstScan){
+        addErgoPuntos(10, 'Empleado escaneado');
+        checkAchievement('first_scan');
+        if(state.scannedNPCs.size===5) checkAchievement('all_scanned');
+      }
+      checkEmailTrigger('scan',state.scannedNPCs.size);
+      if(nd.healthy) SoundManager.playPostureGood();
+      else SoundManager.playPostureBad();
     }
-    document.getElementById('scanner-status').textContent=`ESCANER: ${npcData.name.toUpperCase()}`;
+    document.getElementById('scanner-status').textContent=`ESCÁNER: ${nd.name.toUpperCase()}`;
   } else {
     if(lastScannedId!==null){
-      lastScannedId=null;
-      clearNPCHighlights();
-      updateDiagnosticEmpty();
+      lastScannedId=null; clearNPCHighlights(); updateDiagnosticEmpty();
       document.getElementById('npc-card').classList.remove('visible');
       document.getElementById('scanner-status').textContent='ESCÁNER: ACTIVO';
     }
   }
 }
 
-const highlightedMeshes = [];
-function highlightNPC(grp, data){
+const highlightedMeshes=[];
+function highlightNPC(grp,data){
   clearNPCHighlights();
-  const color = data.healthy ? 0x00cc88 : 0xff2222;
-  const emissive = data.healthy ? 0x00aa55 : 0xcc1100;
+  const emissive=data.healthy?0x00aa55:0xcc1100;
   grp.traverse(c=>{
-    if(c.isMesh && !c.userData?.isLabel){
+    if(c.isMesh&&!c.userData?.isLabel){
       if(!c.userData._origEmissive){
-        c.userData._origEmissive = c.material.emissive?.getHex() ?? 0;
-        c.userData._origEmissiveInt = c.material.emissiveIntensity ?? 0;
+        c.userData._origEmissive=c.material.emissive?.getHex()??0;
+        c.userData._origEmissiveInt=c.material.emissiveIntensity??0;
       }
-      c.material = c.material.clone();
-      c.material.emissive = new THREE.Color(emissive);
-      c.material.emissiveIntensity = 0.45;
+      c.material=c.material.clone();
+      c.material.emissive=new THREE.Color(emissive);
+      c.material.emissiveIntensity=0.5;
       highlightedMeshes.push(c);
     }
   });
 }
 function clearNPCHighlights(){
   highlightedMeshes.forEach(c=>{
-    c.material.emissiveIntensity = c.userData._origEmissiveInt ?? 0;
-    c.material.emissive = new THREE.Color(c.userData._origEmissive ?? 0);
+    c.material.emissiveIntensity=c.userData._origEmissiveInt??0;
+    c.material.emissive=new THREE.Color(c.userData._origEmissive??0);
   });
   highlightedMeshes.length=0;
 }
 
 function updateDiagnosticUI(data){
-  const {posture,seatedHours} = data;
-  setDiagRow('neck', posture.neck, 20, `${posture.neck}°`);
-  setDiagRow('back', posture.spine, 15, `${posture.spine}°`);
-  setDiagRow('wrist', posture.wrist, 15, `${posture.wrist}°`);
-  setDiagRow('hours', seatedHours, 4, `${seatedHours.toFixed(1)}h`);
-
-  const issues = [posture.neck>20, posture.spine>15, posture.wrist>15, seatedHours>4].filter(Boolean).length;
-  const sev = document.getElementById('d-severity');
+  const {posture,seatedHours}=data;
+  setDiagRow('neck',posture.neck,20,`${posture.neck}°`);
+  setDiagRow('back',posture.spine,15,`${posture.spine}°`);
+  setDiagRow('wrist',posture.wrist,15,`${posture.wrist}°`);
+  setDiagRow('hours',seatedHours,4,`${seatedHours.toFixed(1)}h`);
+  const issues=[posture.neck>20,posture.spine>15,posture.wrist>15,seatedHours>4].filter(Boolean).length;
+  const sev=document.getElementById('d-severity');
   if(issues===0){sev.textContent='POSTURA CORRECTA';sev.className='diag-severity sev-none';}
   else if(issues<=2){sev.textContent='RIESGO MODERADO';sev.className='diag-severity sev-low';}
   else{sev.textContent='RIESGO ALTO ⚠';sev.className='diag-severity sev-high';}
 }
-function setDiagRow(part, val, threshold, display){
+function setDiagRow(part,val,threshold,display){
   const icon=document.getElementById(`d-${part}-icon`);
   const valEl=document.getElementById(`d-${part}-val`);
   const bad=val>threshold;
@@ -1015,49 +1577,43 @@ function setDiagRow(part, val, threshold, display){
 }
 function updateDiagnosticEmpty(){
   ['neck','back','wrist','hours'].forEach(p=>{
-    const i=document.getElementById(`d-${p}-icon`);
-    const v=document.getElementById(`d-${p}-val`);
+    const i=document.getElementById(`d-${p}-icon`);const v=document.getElementById(`d-${p}-val`);
     if(i){i.className='diag-icon ok';i.textContent='🔵';}
     if(v){v.textContent='–';v.className='diag-angle ok';}
   });
   const sev=document.getElementById('d-severity');
-  sev.textContent='APUNTA A UN EMPLEADO';
-  sev.className='diag-severity sev-none';
+  sev.textContent='APUNTA A UN EMPLEADO'; sev.className='diag-severity sev-none';
 }
 
 function showNPCCard(data){
   document.getElementById('npc-avatar').textContent=data.emoji;
   document.getElementById('npc-name').textContent=data.name;
   document.getElementById('npc-role').textContent=data.role;
-  const dlg = data.healthy ? data.dialogue.greeting : data.dialogue.pain;
+  const dlg=data.healthy?data.dialogue.greeting:data.dialogue.pain;
   document.getElementById('npc-dialogue').textContent=`"${dlg}"`;
-  const fatigueEl=document.getElementById('npc-fatigue');
-  const prodEl=document.getElementById('npc-productivity');
-  fatigueEl.textContent=`${Math.round(data.fatigue)}%`;
-  fatigueEl.className=`stat-chip-val ${data.fatigue>60?'red':data.fatigue>30?'yellow':'green'}`;
-  prodEl.textContent=`${Math.round(data.productivity)}%`;
-  prodEl.className=`stat-chip-val ${data.productivity>70?'green':data.productivity>40?'yellow':'red'}`;
+  const fatEl=document.getElementById('npc-fatigue');
+  const proEl=document.getElementById('npc-productivity');
+  fatEl.textContent=`${Math.round(data.fatigue)}%`;
+  fatEl.className=`stat-chip-val ${data.fatigue>60?'red':data.fatigue>30?'yellow':'green'}`;
+  proEl.textContent=`${Math.round(data.productivity)}%`;
+  proEl.className=`stat-chip-val ${data.productivity>70?'green':data.productivity>40?'yellow':'red'}`;
   document.getElementById('npc-card').classList.add('visible');
   state.selectedNPC=data;
-  // pre-select in shop
   document.getElementById('shop-npc-sel').value=data.id;
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // INTERACTION
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 function tryInteract(){
   if(!state.isLocked) return;
-  raycaster.setFromCamera(center, camera);
-  const hits = raycaster.intersectObjects(npcMeshes, true);
+  raycaster.setFromCamera(center,camera);
+  const hits=raycaster.intersectObjects(npcMeshes,true);
   if(hits.length>0){
     let npcGrp=null;
     for(const h of hits){
       let obj=h.object;
-      while(obj.parent){
-        if(obj.userData?.isNPC){npcGrp=obj;break;}
-        obj=obj.parent;
-      }
+      while(obj.parent){ if(obj.userData?.isNPC){npcGrp=obj;break;} obj=obj.parent; }
       if(npcGrp) break;
     }
     if(npcGrp){
@@ -1072,75 +1628,55 @@ function tryInteract(){
   }
 }
 
-// Hint text
 function updateHint(){
   if(!state.gameStarted) return;
   raycaster.setFromCamera(center,camera);
-  const hits = raycaster.intersectObjects(npcMeshes,true);
-  const hintEl = document.getElementById('hint');
+  const hits=raycaster.intersectObjects(npcMeshes,true);
+  const hintEl=document.getElementById('hint');
   if(hits.length>0){
     let npcGrp=null;
     for(const h of hits){
       let obj=h.object;
-      while(obj.parent){
-        if(obj.userData?.isNPC){npcGrp=obj;break;}
-        obj=obj.parent;
-      }
+      while(obj.parent){ if(obj.userData?.isNPC){npcGrp=obj;break;} obj=obj.parent; }
       if(npcGrp) break;
     }
-    if(npcGrp){
-      const d=camera.position.distanceTo(npcGrp.position);
-      if(d<5){
-        hintEl.textContent=`[E] Hablar con ${npcGrp.userData.npcData.name}`;
-        hintEl.classList.add('visible');
-        return;
-      }
+    if(npcGrp&&camera.position.distanceTo(npcGrp.position)<5){
+      hintEl.textContent=`[E] Hablar con ${npcGrp.userData.npcData.name}`;
+      hintEl.classList.add('visible'); return;
     }
   }
   hintEl.classList.remove('visible');
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // SHOP SYSTEM
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 function buildShopUI(){
-  const list = document.getElementById('shop-items-list');
-  const sel = document.getElementById('shop-npc-sel');
-  // Populate NPC dropdown
+  const list=document.getElementById('shop-items-list');
+  const sel=document.getElementById('shop-npc-sel');
   NPC_DATA.forEach(n=>{
     const opt=document.createElement('option');
     opt.value=n.id; opt.textContent=`${n.emoji} ${n.name} – ${n.role}`;
     sel.appendChild(opt);
   });
-
   SHOP_ITEMS.forEach(item=>{
     const el=document.createElement('div');
-    el.className='shop-item';
-    el.id=`shop-item-${item.id}`;
+    el.className='shop-item'; el.id=`shop-item-${item.id}`;
     el.innerHTML=`
       <div class="shop-item-header">
         <div class="shop-item-icon">${item.icon}</div>
-        <div>
-          <div class="shop-item-name">${item.name}</div>
-          <div class="shop-item-desc">${item.desc}</div>
-        </div>
+        <div><div class="shop-item-name">${item.name}</div><div class="shop-item-desc">${item.desc}</div></div>
       </div>
       <div class="shop-item-price">${item.price.toLocaleString('es')} €</div>
-      <div class="shop-item-effect">
-        ${item.tags.map(t=>`<span class="effect-tag">${t}</span>`).join('')}
-      </div>`;
+      <div class="shop-item-effect">${item.tags.map(t=>`<span class="effect-tag">${t}</span>`).join('')}</div>`;
     el.addEventListener('click',()=>purchaseItem(item));
     list.appendChild(el);
   });
-
-  document.getElementById('shop-close').addEventListener('click', closeShop);
-  document.getElementById('shop').addEventListener('click', e=>{ if(e.target===document.getElementById('shop')) closeShop(); });
+  document.getElementById('shop-close').addEventListener('click',closeShop);
+  document.getElementById('shop').addEventListener('click',e=>{ if(e.target===document.getElementById('shop')) closeShop(); });
 }
 
-function toggleShop(){
-  if(state.shopOpen) closeShop();
-  else openShop();
-}
+function toggleShop(){ state.shopOpen?closeShop():openShop(); }
 function openShop(){
   state.shopOpen=true;
   document.getElementById('shop').classList.add('open');
@@ -1154,92 +1690,139 @@ function closeShop(){
 function refreshShopState(){
   SHOP_ITEMS.forEach(item=>{
     const el=document.getElementById(`shop-item-${item.id}`);
-    if(el) el.classList.toggle('disabled', state.budget < item.price);
+    if(el) el.classList.toggle('disabled',state.budget<item.price);
   });
 }
 
 function purchaseItem(item){
-  if(state.budget<item.price){
-    showNotif('Presupuesto insuficiente.','error');
-    return;
-  }
-  const targetId = document.getElementById('shop-npc-sel').value;
-  state.budget -= item.price;
+  if(state.budget<item.price){ showNotif('Presupuesto insuficiente.','error'); return; }
+  const targetId=document.getElementById('shop-npc-sel').value;
+  state.budget-=item.price;
   state.totalPurchases++;
+  state.totalSpent+=item.price;
   updateBudgetUI();
   refreshShopState();
-
-  // Apply effects
-  if(targetId==='all'){
-    NPC_DATA.forEach(n=> applyEffectsToNPC(n, item.effects));
-  } else {
-    const npc=NPC_DATA.find(n=>n.id===targetId);
-    if(npc) applyEffectsToNPC(npc, item.effects);
-  }
-
+  if(targetId==='all') NPC_DATA.forEach(n=>applyEffectsToNPC(n,item.effects));
+  else { const npc=NPC_DATA.find(n=>n.id===targetId); if(npc) applyEffectsToNPC(npc,item.effects); }
   updateProductivityUI();
-  showNotif(`✓ ${item.name} adquirido${targetId!=='all'?' para '+NPC_DATA.find(n=>n.id===targetId)?.name:''}!`,'success');
-  state.transformLevel = Math.min(100, state.transformLevel + 8);
+  const targetName=targetId==='all'?'toda la oficina':NPC_DATA.find(n=>n.id===targetId)?.name;
+  showNotif(`✓ ${item.name} adquirido para ${targetName}!`,'success');
+  state.transformLevel=Math.min(100,state.transformLevel+8);
   updateTransformBar();
-  checkEmailTrigger('purchase', state.totalPurchases);
-  checkEmailTrigger('productivity', Math.round(state.productivity));
+  checkEmailTrigger('purchase',state.totalPurchases);
+  checkEmailTrigger('productivity',Math.round(state.productivity));
+  addErgoPuntos(25,'Compra ergonómica');
+  checkAchievement('first_buy');
+  if(state.totalPurchases>=5) checkAchievement('five_buys');
+  if(state.totalSpent>=1000) checkAchievement('budget_100');
+  SoundManager.playPurchase();
   closeShop();
 }
 
-function applyEffectsToNPC(npc, effects){
-  if(effects.spine!==undefined) npc.posture.spine = Math.max(0, npc.posture.spine + effects.spine);
-  if(effects.neck!==undefined) npc.posture.neck = Math.max(0, npc.posture.neck + effects.neck);
-  if(effects.wrist!==undefined) npc.posture.wrist = Math.max(0, npc.posture.wrist + effects.wrist);
-  if(effects.fatigue!==undefined) npc.fatigue = Math.max(0, npc.fatigue + effects.fatigue);
-  if(effects.prod!==undefined) npc.productivity = Math.min(100, npc.productivity + effects.prod);
-  if(npc.fatigue<30 && npc.posture.spine<12 && npc.posture.neck<15) npc.healthy=true;
+function applyEffectsToNPC(npc,effects){
+  if(effects.spine!==undefined) npc.posture.spine=Math.max(0,npc.posture.spine+effects.spine);
+  if(effects.neck!==undefined) npc.posture.neck=Math.max(0,npc.posture.neck+effects.neck);
+  if(effects.wrist!==undefined) npc.posture.wrist=Math.max(0,npc.posture.wrist+effects.wrist);
+  if(effects.fatigue!==undefined) npc.fatigue=Math.max(0,npc.fatigue+effects.fatigue);
+  if(effects.prod!==undefined) npc.productivity=Math.min(100,npc.productivity+effects.prod);
+  const wasHealthy=npc.healthy;
+  if(npc.fatigue<30&&npc.posture.spine<12&&npc.posture.neck<15) npc.healthy=true;
+  if(!wasHealthy&&npc.healthy){
+    addErgoPuntos(50,`${npc.name} recuperado`);
+    const healthyCount=NPC_DATA.filter(n=>n.healthy).length;
+    if(healthyCount>=2) checkAchievement('hero_back');
+  }
   recalcProductivity();
 }
 
 function recalcProductivity(){
-  const avg = NPC_DATA.reduce((s,n)=>s+n.productivity,0)/NPC_DATA.length;
-  state.productivity = Math.round(avg);
+  const avg=NPC_DATA.reduce((s,n)=>s+n.productivity,0)/NPC_DATA.length;
+  state.productivity=Math.round(avg);
   updateProductivityUI();
+  if(state.productivity>=100&&!state.victoryShown){ state.victoryShown=true; triggerVictory(); }
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// ERGO PUNTOS & ACHIEVEMENTS
+// ══════════════════════════════════════════════════════
+function addErgoPuntos(amount, reason){
+  state.ergoPuntos+=amount;
+  document.getElementById('ergo-pts').textContent=state.ergoPuntos;
+  if(state.ergoPuntos>=500) checkAchievement('puntos_500');
+}
+
+function checkAchievement(id){
+  if(state.achievements.has(id)) return;
+  const def=ACHIEVEMENTS_DEF.find(a=>a.id===id);
+  if(!def) return;
+
+  // Check special conditions
+  if(id==='ergo_total' && state.productivity<100) return;
+
+  state.achievements.add(id);
+  addErgoPuntos(def.pts, 'Logro desbloqueado');
+  showAchievementPopup(def);
+  SoundManager.playAchievement();
+}
+
+function showAchievementPopup(def){
+  const area=document.getElementById('achievement-area');
+  const el=document.createElement('div');
+  el.className='achievement-popup';
+  el.innerHTML=`<div class="achieve-icon">${def.icon}</div><div class="achieve-text"><div class="achieve-title">🏆 LOGRO DESBLOQUEADO</div><div class="achieve-name">${def.name}</div><div class="achieve-desc">${def.desc} · +${def.pts} pts</div></div>`;
+  area.appendChild(el);
+  setTimeout(()=>el.remove(),5500);
+}
+
+// ══════════════════════════════════════════════════════
 // HUD UPDATES
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 function updateBudgetUI(){
-  document.getElementById('budget-val').textContent = `${state.budget.toLocaleString('es')} €`;
+  document.getElementById('budget-val').textContent=`${state.budget.toLocaleString('es')} €`;
+  document.getElementById('ergo-pts').textContent=state.ergoPuntos;
 }
 function updateProductivityUI(){
-  document.getElementById('prod-val').textContent = `${state.productivity}%`;
-  document.getElementById('prod-fill').style.width = `${state.productivity}%`;
+  document.getElementById('prod-val').textContent=`${state.productivity}%`;
+  document.getElementById('prod-fill').style.width=`${state.productivity}%`;
+  updateHealthBar();
+  updateFogColor();
+  SoundManager.setAmbient(state.productivity/100);
 }
 function updateTransformBar(){
-  document.getElementById('transform-fill').style.width = `${state.transformLevel}%`;
+  document.getElementById('transform-fill').style.width=`${state.transformLevel}%`;
+}
+function updateHealthBar(){
+  const healthyCount=NPC_DATA.filter(n=>n.healthy).length;
+  const healthScore=(state.productivity*0.8+healthyCount/5*20);
+  document.getElementById('health-fill').style.width=`${Math.min(100,healthScore)}%`;
+}
+function updateFogColor(){
+  const t=state.productivity/100;
+  const r=Math.round(10+t*5);
+  const g=Math.round(22+t*15);
+  const b=Math.round(40+t*20);
+  scene.fog.color.setRGB(r/255,g/255,b/255);
 }
 
-// ═══════════════════════════════════════════════
-// NOTIFICATIONS
-// ═══════════════════════════════════════════════
-function showNotif(msg, type='success'){
+// ══════════════════════════════════════════════════════
+// NOTIFICATIONS & EMAILS
+// ══════════════════════════════════════════════════════
+function showNotif(msg,type='success'){
   const area=document.getElementById('notif-area');
   const n=document.createElement('div');
-  n.className=`notif ${type}`;
-  n.textContent=msg;
+  n.className=`notif ${type}`; n.textContent=msg;
   area.appendChild(n);
-  setTimeout(()=>n.remove(), 4000);
+  setTimeout(()=>n.remove(),4200);
 }
 
-// ═══════════════════════════════════════════════
-// EMAIL SYSTEM
-// ═══════════════════════════════════════════════
 let triggeredEmails=new Set();
-function checkEmailTrigger(type, val){
+function checkEmailTrigger(type,val){
   EMAILS_DATA.forEach(e=>{
     if(triggeredEmails.has(e.id)) return;
     let trigger=false;
     if(e.triggerType==='immediate') trigger=true;
     else if(e.triggerType===type){
-      if(typeof e.triggerVal==='number') trigger = val>=e.triggerVal;
-      else trigger = val===e.triggerVal;
+      trigger=typeof e.triggerVal==='number'?val>=e.triggerVal:val===e.triggerVal;
     }
     if(trigger){ triggeredEmails.add(e.id); showEmailNotif(e); }
   });
@@ -1247,95 +1830,300 @@ function checkEmailTrigger(type, val){
 
 function showEmailNotif(email){
   const area=document.getElementById('email-notif');
-  const t=document.createElement('div');
-  t.className='email-toast';
-  const cat={urgent:'🚨',warning:'⚠️',positive:'🎉',report:'📊',update:'📋'}[email.category]||'✉️';
-  t.innerHTML=`<div class="email-icon">${cat}</div><div class="email-content"><strong>NUEVO CORREO</strong>${email.subject}</div>`;
+  const t=document.createElement('div'); t.className='email-toast';
+  const cat={urgent:'🚨',warning:'⚠️',positive:'🎉',report:'📊'}[email.category]||'✉️';
+  t.innerHTML=`<div class="email-icon">${cat}</div><div class="email-content"><strong>CORREO NUEVO</strong>${email.subject}</div>`;
   area.appendChild(t);
-  setTimeout(()=>t.remove(),5000);
-  if(email.category==='positive' && email.triggerType==='productivity'){
-    // Extra budget reward
-    const bonus=500;
-    state.budget+=bonus;
-    updateBudgetUI();
-    setTimeout(()=>showNotif(`💰 Bonus CEO: +${bonus}€ añadidos al presupuesto!`,'success'),600);
+  setTimeout(()=>t.remove(),5200);
+  SoundManager.playEmail();
+  if(email.category==='positive'&&email.triggerType==='productivity'){
+    const bonus=500; state.budget+=bonus; updateBudgetUI();
+    setTimeout(()=>showNotif(`💰 Bonus CEO: +${bonus}€ añadidos al presupuesto!`,'success'),700);
   }
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// MINIMAP
+// ══════════════════════════════════════════════════════
+const minimapCanvas=document.getElementById('minimap');
+const minimapCtx=minimapCanvas.getContext('2d');
+const MMAP_SIZE=160, ROOM_SIZE=32;
+
+function renderMinimap(){
+  if(!state.gameStarted) return;
+  const ctx=minimapCtx;
+  const s=MMAP_SIZE/ROOM_SIZE;
+  ctx.clearRect(0,0,MMAP_SIZE,MMAP_SIZE);
+
+  // Background
+  ctx.fillStyle='rgba(5,13,20,0.88)'; ctx.fillRect(0,0,MMAP_SIZE,MMAP_SIZE);
+
+  // Room outline
+  ctx.strokeStyle='rgba(0,212,200,0.3)'; ctx.lineWidth=1;
+  ctx.strokeRect(1,1,MMAP_SIZE-2,MMAP_SIZE-2);
+
+  // Inner walls/dividers (simplified)
+  ctx.strokeStyle='rgba(180,196,210,0.25)'; ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(71,71); ctx.lineTo(89,71);
+  ctx.moveTo(89,71); ctx.lineTo(89,79);
+  ctx.moveTo(64,72); ctx.lineTo(64,87);
+  ctx.moveTo(96,72); ctx.lineTo(96,87);
+  ctx.stroke();
+
+  // Desk icons
+  NPC_DATA.forEach(npc=>{
+    const mx=(npc.position.x+16)*s;
+    const mz=(npc.position.z+16)*s;
+    // Desk
+    ctx.fillStyle='rgba(90,70,50,0.5)';
+    ctx.fillRect(mx-8,mz-5,16,10);
+    // NPC dot
+    ctx.fillStyle=npc.healthy?'#00cc88':'#ff3333';
+    ctx.shadowColor=npc.healthy?'#00cc88':'#ff3333';
+    ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.arc(mx,mz,4.5,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+  });
+
+  // Player arrow
+  const px=(camera.position.x+16)*s;
+  const pz=(camera.position.z+16)*s;
+  ctx.save();
+  ctx.translate(px,pz);
+  ctx.rotate(yaw+Math.PI);
+  ctx.fillStyle='#ffffff';
+  ctx.shadowColor='#00d4c8'; ctx.shadowBlur=8;
+  ctx.beginPath();
+  ctx.moveTo(0,-7); ctx.lineTo(4,5); ctx.lineTo(-4,5);
+  ctx.closePath(); ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.restore();
+
+  // Border glow
+  ctx.strokeStyle='rgba(0,212,200,0.45)'; ctx.lineWidth=1.5;
+  ctx.strokeRect(0.5,0.5,MMAP_SIZE-1,MMAP_SIZE-1);
+}
+
+// ══════════════════════════════════════════════════════
+// ERGONOMICS PANEL
+// ══════════════════════════════════════════════════════
+function toggleErgoPanel(){
+  state.ergoOpen?closeErgoPanel():openErgoPanel();
+}
+function openErgoPanel(){
+  state.ergoOpen=true;
+  document.getElementById('ergo-panel').classList.add('open');
+  if(state.isLocked) document.exitPointerLock();
+}
+function closeErgoPanel(){
+  state.ergoOpen=false;
+  document.getElementById('ergo-panel').classList.remove('open');
+}
+window.closeErgoPanel=closeErgoPanel;
+
+// ══════════════════════════════════════════════════════
+// STATS PANEL
+// ══════════════════════════════════════════════════════
+function toggleStatsPanel(){
+  state.statsOpen?closeStatsPanel():openStatsPanel();
+}
+function openStatsPanel(){
+  state.statsOpen=true;
+  updateStatsPanel();
+  document.getElementById('stats-panel').classList.add('open');
+  if(state.isLocked) document.exitPointerLock();
+}
+function closeStatsPanel(){
+  state.statsOpen=false;
+  document.getElementById('stats-panel').classList.remove('open');
+}
+window.closeStatsPanel=closeStatsPanel;
+
+function updateStatsPanel(){
+  const elapsed=state.gameStarted?Math.floor((Date.now()-state.startTime)/1000):0;
+  const mm=Math.floor(elapsed/60).toString().padStart(2,'0');
+  const ss=(elapsed%60).toString().padStart(2,'0');
+  document.getElementById('st-time').textContent=`${mm}:${ss}`;
+  document.getElementById('st-scanned').textContent=`${state.scannedNPCs.size}/5`;
+  document.getElementById('st-spent').textContent=`${state.totalSpent.toLocaleString('es')} €`;
+  document.getElementById('st-pts').textContent=state.ergoPuntos;
+
+  const npcList=document.getElementById('npc-status-list');
+  npcList.innerHTML='';
+  NPC_DATA.forEach(n=>{
+    const row=document.createElement('div'); row.className='npc-status-row';
+    row.innerHTML=`<span class="npc-status-name">${n.emoji} ${n.name} – ${n.role}</span><span class="npc-status-badge ${n.healthy?'ok':'bad'}">${n.healthy?'✓ SALUDABLE':'⚠ PROBLEMA'}</span>`;
+    npcList.appendChild(row);
+  });
+
+  const achList=document.getElementById('achievement-list');
+  achList.innerHTML='';
+  ACHIEVEMENTS_DEF.forEach(a=>{
+    const badge=document.createElement('div');
+    badge.className=`ach-badge${state.achievements.has(a.id)?'':' locked'}`;
+    badge.textContent=`${a.icon} ${a.name}`;
+    achList.appendChild(badge);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// TUTORIAL
+// ══════════════════════════════════════════════════════
+function showTutorial(){
+  state.tutorialOpen=true;
+  document.getElementById('tutorial').classList.add('open');
+  if(state.isLocked) document.exitPointerLock();
+}
+function closeTutorial(){
+  state.tutorialOpen=false;
+  document.getElementById('tutorial').classList.remove('open');
+}
+
+document.getElementById('tut-no-show').addEventListener('click',()=>{
+  try{ localStorage.setItem('ip_tutorial_done','1'); }catch(e){}
+  closeTutorial();
+});
+
+// ══════════════════════════════════════════════════════
+// VICTORY CELEBRATION
+// ══════════════════════════════════════════════════════
+function triggerVictory(){
+  checkAchievement('ergo_total');
+  SoundManager.playVictory();
+  // Flash effect
+  const flash=document.getElementById('victory-flash');
+  flash.classList.add('flash');
+  setTimeout(()=>flash.classList.remove('flash'),400);
+  // Confetti burst
+  spawnConfetti(150);
+  setTimeout(()=>spawnConfetti(100),1200);
+  showNotif('🏆 ¡MISIÓN COMPLETADA! Empresa transformada al 100%!','success');
+  // All NPCs become healthy
+  NPC_DATA.forEach(n=>{ n.healthy=true; n.fatigue=Math.max(10,n.fatigue-40); n.productivity=100; });
+  updateProductivityUI();
+}
+
+function spawnConfetti(count){
+  const container=document.getElementById('confetti-container');
+  const colors=['#00d4c8','#0088ff','#ff4444','#ffaa00','#00ff88','#ff88cc','#8866ff'];
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    const size=6+Math.random()*10;
+    p.style.cssText=`
+      left:${Math.random()*100}vw;
+      width:${size}px; height:${size*0.4}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${2+Math.random()*3}s;
+      animation-delay:${Math.random()*1.5}s;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    container.appendChild(p);
+    setTimeout(()=>p.remove(),5500);
+  }
+}
+
+// ══════════════════════════════════════════════════════
 // NPC ANIMATION
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+let npcAnimStates=NPC_DATA.map(()=>({phase:Math.random()*Math.PI*2, stretch:false, stretchTimer:0}));
+
 function animateNPCs(t){
   npcMeshes.forEach((grp,i)=>{
     const data=grp.userData.npcData;
-    // Idle breathing sway
-    const breathe=Math.sin(t*1.2+i*1.3)*0.006;
-    grp.position.y = breathe;
+    const anim=npcAnimStates[i];
 
-    // Head subtle movement
+    // Breathing
+    const breathe=Math.sin(t*1.1+anim.phase)*0.005;
+    grp.position.y=breathe;
+
+    // Head movement
     const head=grp.children.find(c=>c.userData?.bodyPart==='head');
     if(head){
-      head.rotation.y = Math.sin(t*0.4+i*0.8)*0.05;
-      head.rotation.x = Math.sin(t*0.3+i*0.5)*0.02;
+      if(data.healthy){
+        head.rotation.y=Math.sin(t*0.35+anim.phase)*0.06;
+        head.rotation.x=Math.sin(t*0.25+anim.phase)*0.025;
+      } else {
+        // Stiff neck pain movement
+        head.rotation.y=Math.sin(t*0.2+anim.phase)*0.04;
+        head.rotation.x=-0.08+Math.sin(t*0.15+anim.phase)*0.04; // slightly downward
+      }
     }
 
-    // Typing animation (arm bob)
+    // Typing animation
+    const lArm=grp.children.find(c=>c.userData?.bodyPart==='arm_left');
+    const rArm=grp.children.find(c=>c.userData?.bodyPart==='arm_right');
     if(!data.healthy){
-      const lArm=grp.children.find(c=>c.userData?.bodyPart==='arm_left');
-      const rArm=grp.children.find(c=>c.userData?.bodyPart==='arm_right');
-      if(lArm) lArm.rotation.x = Math.sin(t*4+i)*0.03;
-      if(rArm) rArm.rotation.x = Math.sin(t*4+i+Math.PI)*0.03;
+      if(lArm) lArm.rotation.x=Math.sin(t*4.2+anim.phase)*0.04;
+      if(rArm) rArm.rotation.x=Math.sin(t*4.2+anim.phase+Math.PI)*0.04;
+    } else {
+      // Relaxed arm motion
+      if(lArm) lArm.rotation.x=Math.sin(t*2.5+anim.phase)*0.02;
+      if(rArm) rArm.rotation.x=Math.sin(t*2.5+anim.phase+Math.PI)*0.02;
     }
 
-    // Pain ring pulse
+    // Stretch animation (every 45s for unhealthy NPCs)
+    if(!data.healthy){
+      anim.stretchTimer+=0.016;
+      if(anim.stretchTimer>45){
+        anim.stretchTimer=0; anim.stretch=true;
+        setTimeout(()=>anim.stretch=false, 3000);
+      }
+      if(anim.stretch){
+        const st=t*2;
+        if(lArm) lArm.rotation.x=-Math.sin(st)*0.5;
+        if(rArm) rArm.rotation.x=-Math.sin(st)*0.5;
+      }
+    }
+
+    // Pain ring
     const ring=grp.children.find(c=>c.userData?.isPainRing);
     if(ring){
-      ring.position.y=ring.userData.baseY+Math.sin(t*2+i)*0.04;
-      ring.material.opacity=0.5+Math.sin(t*3+i)*0.3;
-      ring.rotation.z=t*0.5;
+      ring.position.y=ring.userData.baseY+Math.sin(t*2.2+anim.phase)*0.045;
+      ring.material.opacity=0.55+Math.sin(t*3.5+anim.phase)*0.3;
+      ring.rotation.z=t*0.45;
     }
 
-    // Label always faces camera
+    // Label billboarding
     const label=grp.children.find(c=>c.userData?.isLabel);
     if(label){
-      const worldPos=new THREE.Vector3();
-      grp.getWorldPosition(worldPos);
-      label.lookAt(camera.position.x-grp.position.x+grp.position.x,
+      const worldPos=grp.getWorldPosition(new THREE.Vector3());
+      label.lookAt(
+        camera.position.x-grp.position.x+grp.position.x,
         camera.position.y,
-        camera.position.z-grp.position.z+grp.position.z);
+        camera.position.z-grp.position.z+grp.position.z
+      );
     }
   });
 }
 
-// ═══════════════════════════════════════════════
-// PASSIVE INCOME TIMER
-// ═══════════════════════════════════════════════
-let lastIncome=0;
+// ══════════════════════════════════════════════════════
+// PASSIVE INCOME & FATIGUE
+// ══════════════════════════════════════════════════════
+let lastIncome=0, lastFatigue=0;
+
 function updateIncome(t){
   if(!state.gameStarted) return;
   if(t-lastIncome>30){
     lastIncome=t;
-    const inc = Math.round(200 + (state.productivity/100)*300);
-    state.budget += inc;
-    updateBudgetUI();
-    refreshShopState();
-    showNotif(`💰 Ingresos recibidos: +${inc}€`,'success');
-    state.transformLevel = Math.min(100, state.transformLevel + (state.productivity/100)*3);
+    const inc=Math.round(200+(state.productivity/100)*300);
+    state.budget+=inc; updateBudgetUI(); refreshShopState();
+    showNotif(`💰 Ingresos: +${inc}€`,'success');
+    state.transformLevel=Math.min(100,state.transformLevel+(state.productivity/100)*3);
     updateTransformBar();
-    checkEmailTrigger('productivity', state.productivity);
+    checkEmailTrigger('productivity',state.productivity);
   }
 }
 
-// Passive fatigue increase
-let lastFatigue=0;
 function updateFatigue(t){
   if(!state.gameStarted) return;
   if(t-lastFatigue>15){
     lastFatigue=t;
     NPC_DATA.forEach(n=>{
       if(!n.healthy){
-        n.fatigue=Math.min(100, n.fatigue+3);
-        n.productivity=Math.max(5, n.productivity-2);
+        n.fatigue=Math.min(100,n.fatigue+2);
+        n.productivity=Math.max(5,n.productivity-1.5);
         n.seatedHours+=0.25;
       }
     });
@@ -1343,58 +2131,83 @@ function updateFatigue(t){
   }
 }
 
-// ═══════════════════════════════════════════════
-// LOADING SIMULATION + START
-// ═══════════════════════════════════════════════
-const loadBar = document.getElementById('load-bar');
-const loadText = document.getElementById('load-text');
-const startBtn = document.getElementById('start-btn');
-const msgs=['CARGANDO MODELOS 3D...','INICIALIZANDO SISTEMAS...','CARGANDO DATOS POSTURALES...','PREPARANDO ESCÁNER...','¡LISTO!'];
+// ══════════════════════════════════════════════════════
+// LOADING + START
+// ══════════════════════════════════════════════════════
+const loadBar=document.getElementById('load-bar');
+const loadText=document.getElementById('load-text');
+const startBtn=document.getElementById('start-btn');
+const msgs=[
+  'CARGANDO MODELOS 3D...','INICIALIZANDO SISTEMAS DE DIAGNÓSTICO...',
+  'CARGANDO DATOS POSTURALES...','PREPARANDO ESCÁNER ERGONÓMICO...',
+  'GENERANDO TEXTURAS PBR...','COMPILANDO SHADERS...',
+  '¡SISTEMAS LISTOS!'
+];
 let loadStep=0;
 const loadInterval=setInterval(()=>{
   loadStep++;
-  const pct = Math.min(loadStep*22, 100);
+  const pct=Math.min(loadStep*(100/msgs.length),100);
   loadBar.style.width=`${pct}%`;
-  loadText.textContent = msgs[Math.min(loadStep-1,msgs.length-1)];
-  if(pct>=100){
-    clearInterval(loadInterval);
-    startBtn.style.display='block';
-  }
-},400);
+  loadText.textContent=msgs[Math.min(loadStep-1,msgs.length-1)];
+  if(pct>=100){ clearInterval(loadInterval); startBtn.style.display='block'; }
+},380);
 
 startBtn.addEventListener('click',()=>{
   document.getElementById('splash').classList.add('hidden');
   setTimeout(()=>{
     document.getElementById('splash').style.display='none';
-    document.getElementById('click-overlay').classList.remove('hidden');
     state.gameStarted=true;
-    updateBudgetUI();
-    updateProductivityUI();
+    state.startTime=Date.now();
+    updateBudgetUI(); updateProductivityUI();
     checkEmailTrigger('immediate',0);
     showNotif('¡Misión iniciada! Usa Q para activar el escáner postural.','success');
-  },1200);
+    SoundManager.init();
+    // Tutorial
+    try{ if(!localStorage.getItem('ip_tutorial_done')) showTutorial(); }
+    catch(e){ showTutorial(); }
+    if(!state.tutorialOpen){
+      document.getElementById('click-overlay').classList.remove('hidden');
+    }
+  },1300);
 });
 
-// ═══════════════════════════════════════════════
+document.getElementById('tut-start').addEventListener('click',()=>{
+  closeTutorial();
+  document.getElementById('click-overlay').classList.remove('hidden');
+}, {once:false});
+
+// ══════════════════════════════════════════════════════
 // MAIN LOOP
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 function animate(){
   requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(), 0.04);
+  const dt=Math.min(clock.getDelta(),0.04);
   const t=clock.getElapsedTime();
+
   updatePlayer(dt);
   updateScanner();
   updateHint();
   animateNPCs(t);
   updateIncome(t);
   updateFatigue(t);
-  renderer.render(scene, camera);
+  renderMinimap();
+
+  // Update film grain time
+  if(window._grainPass) window._grainPass.uniforms.time.value=t;
+
+  // Render
+  if(usePostFX && composer){
+    composer.render();
+  } else {
+    renderer.render(scene,camera);
+  }
 }
 
 window.addEventListener('resize',()=>{
   camera.aspect=window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  if(composer) composer.setSize(window.innerWidth,window.innerHeight);
 });
 
 buildShopUI();
