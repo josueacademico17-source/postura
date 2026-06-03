@@ -1,0 +1,92 @@
+[
+  {
+    "id": "npc_001",
+    "name": "Carlos Mendoza",
+    "role": "Call Center",
+    "initials": "CM",
+    "department": "callcenter",
+    "stationId": "call_01",
+    "posture": { "neck": 25, "spine": 18, "wrist": 22, "elbow": 85 },
+    "seatedHours": 5.2,
+    "fatigue": 70,
+    "productivity": 45,
+    "healthy": false,
+    "dialogue": {
+      "greeting": "Llevo 5 horas sin levantarme. Siento la espalda rigida.",
+      "pain": "Me duele el cuello y la zona lumbar constantemente.",
+      "need": "Necesito una silla ergonomica y soporte para monitor."
+    }
+  },
+  {
+    "id": "npc_002",
+    "name": "Ana Ramirez",
+    "role": "Diseno Grafico",
+    "initials": "AR",
+    "department": "design",
+    "stationId": "design_01",
+    "posture": { "neck": 15, "spine": 12, "wrist": 28, "elbow": 80 },
+    "seatedHours": 3.1,
+    "fatigue": 45,
+    "productivity": 65,
+    "healthy": false,
+    "dialogue": {
+      "greeting": "Mis munecas duelen de usar la tableta todo el dia.",
+      "pain": "Tengo hormigueo en los dedos y brazos.",
+      "need": "Un reposamunecas y ajustar la altura de la silla me ayudaria."
+    }
+  },
+  {
+    "id": "npc_003",
+    "name": "Laura Fernandez",
+    "role": "Recursos Humanos",
+    "initials": "LF",
+    "department": "hr",
+    "stationId": "hr_01",
+    "posture": { "neck": 30, "spine": 22, "wrist": 10, "elbow": 95 },
+    "seatedHours": 6.3,
+    "fatigue": 80,
+    "productivity": 35,
+    "healthy": false,
+    "dialogue": {
+      "greeting": "Tengo migranas constantes por la postura frente al monitor.",
+      "pain": "Toda la espalda me duele, especialmente los hombros.",
+      "need": "Necesito el monitor a la altura correcta y pausas activas."
+    }
+  },
+  {
+    "id": "npc_004",
+    "name": "Roberto Diaz",
+    "role": "Administracion",
+    "initials": "RD",
+    "department": "administration",
+    "stationId": "admin_01",
+    "posture": { "neck": 10, "spine": 8, "wrist": 8, "elbow": 92 },
+    "seatedHours": 2,
+    "fatigue": 25,
+    "productivity": 85,
+    "healthy": true,
+    "dialogue": {
+      "greeting": "Me siento bien, mi silla nueva es excelente.",
+      "pain": "Sin dolores hoy, gracias a los ajustes que hice.",
+      "need": "Estoy comodo, pero mis companeros necesitan ayuda."
+    }
+  },
+  {
+    "id": "npc_005",
+    "name": "Sofia Castillo",
+    "role": "Recepcion",
+    "initials": "SC",
+    "department": "reception",
+    "stationId": "reception_01",
+    "posture": { "neck": 20, "spine": 14, "wrist": 15, "elbow": 88 },
+    "seatedHours": 4,
+    "fatigue": 55,
+    "productivity": 60,
+    "healthy": false,
+    "dialogue": {
+      "greeting": "Atiendo a mucha gente pero mi silla es incomoda.",
+      "pain": "La zona lumbar me duele al final del turno.",
+      "need": "Necesito una silla con soporte lumbar adecuado."
+    }
+  }
+]

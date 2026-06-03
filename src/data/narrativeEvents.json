@@ -1,0 +1,46 @@
+[
+  {
+    "id": "e1",
+    "subject": "URGENTE: Bajas por dolor lumbar",
+    "from": "RRHH",
+    "content": "Aumento del 40% en bajas por dolores de espalda este mes. Se requiere evaluacion inmediata.",
+    "category": "urgent",
+    "triggerType": "immediate"
+  },
+  {
+    "id": "e2",
+    "subject": "Reunion de emergencia del comite",
+    "from": "Comite de Trabajadores",
+    "content": "Los empleados han reportado condiciones insatisfactorias. Necesitamos una reunion urgente.",
+    "category": "warning",
+    "triggerType": "scan",
+    "triggerVal": 2
+  },
+  {
+    "id": "e3",
+    "subject": "Presupuesto extra aprobado",
+    "from": "Direccion General",
+    "content": "Se aprueba presupuesto adicional de 500 EUR para mejoras ergonomicas.",
+    "category": "positive",
+    "triggerType": "purchase",
+    "triggerVal": 1
+  },
+  {
+    "id": "e4",
+    "subject": "Reporte: Productividad en recuperacion",
+    "from": "Business Analytics",
+    "content": "Los datos muestran mejora sostenida en productividad. La inversion esta dando resultados.",
+    "category": "report",
+    "triggerType": "productivity",
+    "triggerVal": 65
+  },
+  {
+    "id": "e5",
+    "subject": "Felicitaciones del CEO",
+    "from": "CEO - Global Corp",
+    "content": "La empresa esta viendo resultados extraordinarios. Han transformado nuestro ambiente laboral.",
+    "category": "positive",
+    "triggerType": "productivity",
+    "triggerVal": 80
+  }
+]

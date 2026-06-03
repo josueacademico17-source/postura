@@ -1,0 +1,19 @@
+{
+  "thresholds": {
+    "neck": 20,
+    "spine": 15,
+    "wrist": 15,
+    "seatedHours": 4
+  },
+  "labels": {
+    "neck": "Cuello",
+    "spine": "Columna",
+    "wrist": "Munecas",
+    "seatedHours": "Horas sentado"
+  },
+  "severity": {
+    "none": "POSTURA CORRECTA",
+    "moderate": "RIESGO MODERADO",
+    "high": "RIESGO ALTO"
+  }
+}

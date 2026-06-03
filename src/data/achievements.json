@@ -1,0 +1,23 @@
+[
+  {
+    "id": "first_scan",
+    "name": "Primera inspeccion",
+    "description": "Escanea a un empleado por primera vez.",
+    "trigger": "scan",
+    "target": 1
+  },
+  {
+    "id": "ergonomic_investor",
+    "name": "Inversion ergonomica",
+    "description": "Compra una mejora para el equipo.",
+    "trigger": "purchase",
+    "target": 1
+  },
+  {
+    "id": "healthy_company",
+    "name": "Empresa saludable",
+    "description": "Alcanza 80% de productividad.",
+    "trigger": "productivity",
+    "target": 80
+  }
+]
