@@ -1,0 +1,17 @@
+{
+  "name": "inspector-postural",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Inspector postural 3D profesional con Three.js y Vite.",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "three": "^0.184.0",
+    "vite": "^8.0.16"
+  },
+  "devDependencies": {}
+}

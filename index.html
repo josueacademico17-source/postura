@@ -1,1496 +1,305 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inspector Postural v2 – La Empresa en Crisis</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{overflow:hidden;background:#050d14;font-family:'Segoe UI',sans-serif;user-select:none}
-canvas{display:block;width:100vw;height:100vh}
-
-/* ── SPLASH ─────────────────────────── */
-#splash{position:fixed;inset:0;background:linear-gradient(135deg,#050d14 0%,#0a1628 60%,#0d1f35 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:900;transition:opacity 1.2s ease}
-#splash.hidden{opacity:0;pointer-events:none}
-.splash-logo{width:90px;height:90px;background:linear-gradient(135deg,#00d4c8,#0088ff);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:28px;box-shadow:0 0 40px rgba(0,212,200,.35)}
-.splash-title{color:#fff;font-size:28px;font-weight:700;letter-spacing:3px;margin-bottom:6px}
-.splash-sub{color:#00d4c8;font-size:13px;letter-spacing:5px;margin-bottom:40px;opacity:.8}
-.splash-mission{background:rgba(0,212,200,.07);border:1px solid rgba(0,212,200,.2);border-radius:12px;padding:16px 28px;color:rgba(255,255,255,.75);font-size:13px;max-width:440px;text-align:center;line-height:1.7;margin-bottom:40px}
-.splash-mission strong{color:#00d4c8}
-.bar-wrap{width:320px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-bottom:10px}
-.bar-fill{height:100%;width:0;background:linear-gradient(90deg,#00d4c8,#0088ff);transition:width .25s ease;border-radius:2px}
-#load-text{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:2px;font-family:monospace}
-.start-btn{margin-top:20px;display:none;background:linear-gradient(135deg,#00d4c8,#0088ff);border:none;color:#fff;padding:14px 44px;border-radius:10px;font-size:15px;font-weight:600;letter-spacing:2px;cursor:pointer;transition:transform .15s,box-shadow .15s}
-.start-btn:hover{transform:scale(1.04);box-shadow:0 0 30px rgba(0,212,200,.5)}
-
-/* ── HUD ───────────────────────────── */
-#hud{position:fixed;inset:0;pointer-events:none;z-index:100}
-
-/* Budget */
-#budget-panel{position:absolute;top:18px;left:18px;background:rgba(5,13,20,.85);backdrop-filter:blur(10px);border:1px solid rgba(0,212,200,.25);border-radius:12px;padding:12px 18px;pointer-events:none}
-.hud-label{color:rgba(255,255,255,.4);font-size:10px;letter-spacing:2px;text-transform:uppercase}
-.hud-value{color:#00d4c8;font-size:22px;font-weight:700;font-family:monospace}
-
-/* Productivity */
-#prod-panel{position:absolute;top:18px;right:18px;background:rgba(5,13,20,.85);backdrop-filter:blur(10px);border:1px solid rgba(0,212,200,.25);border-radius:12px;padding:12px 18px;text-align:right;pointer-events:none}
-.prod-bar{width:160px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:6px;overflow:hidden}
-.prod-fill{height:100%;background:linear-gradient(90deg,#ff4444,#ffaa00,#00d4c8);border-radius:2px;transition:width .8s ease}
-
-/* Crosshair */
-#xhair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;pointer-events:none}
-#xhair::before,#xhair::after{content:'';position:absolute;background:rgba(255,255,255,.8);border-radius:1px}
-#xhair::before{width:2px;height:14px;top:5px;left:11px}
-#xhair::after{width:14px;height:2px;top:11px;left:5px}
-#xhair .dot{position:absolute;width:4px;height:4px;background:#00d4c8;border-radius:50%;top:10px;left:10px}
-
-/* Interaction hint */
-#hint{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);backdrop-filter:blur(8px);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;border:1px solid rgba(255,255,255,.15);opacity:0;transition:opacity .3s;white-space:nowrap}
-#hint.visible{opacity:1}
-
-/* Controls */
-#controls{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:center}
-.ctrl-key{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;color:rgba(255,255,255,.65);font-size:11px;padding:3px 8px;font-family:monospace}
-.ctrl-desc{color:rgba(255,255,255,.35);font-size:11px}
-
-/* Scanner HUD */
-#scanner-overlay{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;z-index:50}
-#scanner-overlay.active{opacity:1}
-.scan-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,180,255,.12) 100%)}
-.scan-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,180,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,255,.04) 1px,transparent 1px);background-size:40px 40px}
-.scan-corners{position:absolute;inset:0}
-.scan-corners::before,.scan-corners::after{content:'';position:absolute;width:40px;height:40px;border-color:rgba(0,212,200,.8);border-style:solid}
-.scan-corners::before{top:20px;left:20px;border-width:3px 0 0 3px}
-.scan-corners::after{bottom:20px;right:20px;border-width:0 3px 3px 0}
-#scanner-status{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border:1px solid currentColor;border-radius:20px;padding:4px 16px;font-size:11px;letter-spacing:2px;font-family:monospace;color:rgba(255,255,255,.4)}
-#scanner-status.active-status{color:#00d4c8;animation:pulse-status 1.5s infinite}
-@keyframes pulse-status{0%,100%{opacity:1}50%{opacity:.5}}
-
-/* Diagnostic silhouette */
-#diagnostic{position:absolute;right:18px;top:50%;transform:translateY(-50%);background:rgba(5,13,20,.9);backdrop-filter:blur(10px);border:1px solid rgba(0,212,200,.2);border-radius:14px;padding:16px;width:190px;display:none}
-#diagnostic.visible{display:block}
-.diag-title{color:rgba(255,255,255,.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
-.diag-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.diag-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.diag-icon.ok{background:rgba(0,212,200,.15);border:1px solid rgba(0,212,200,.3)}
-.diag-icon.bad{background:rgba(255,60,60,.15);border:1px solid rgba(255,60,60,.3);animation:blink-bad .8s infinite}
-@keyframes blink-bad{0%,100%{opacity:1}50%{opacity:.4}}
-.diag-label{font-size:11px;color:rgba(255,255,255,.6);flex:1}
-.diag-angle{font-size:10px;font-family:monospace;font-weight:700}
-.diag-angle.ok{color:#00d4c8}
-.diag-angle.bad{color:#ff4444}
-.diag-severity{margin-top:10px;padding:6px 10px;border-radius:6px;font-size:10px;letter-spacing:1px;text-align:center;font-weight:600}
-.sev-none{background:rgba(0,212,200,.1);color:#00d4c8;border:1px solid rgba(0,212,200,.2)}
-.sev-low{background:rgba(255,170,0,.1);color:#ffaa00;border:1px solid rgba(255,170,0,.2)}
-.sev-high{background:rgba(255,60,60,.1);color:#ff4444;border:1px solid rgba(255,60,60,.2)}
-
-/* NPC Dialogue Card */
-#npc-card{position:absolute;left:18px;top:50%;transform:translateY(-50%);background:rgba(5,13,20,.9);backdrop-filter:blur(12px);border:1px solid rgba(0,212,200,.2);border-radius:14px;padding:18px;width:240px;display:none;opacity:0;transition:opacity .3s}
-#npc-card.visible{display:block;opacity:1}
-.npc-avatar{width:48px;height:48px;border-radius:50%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid rgba(0,212,200,.3)}
-.npc-name{color:#fff;font-size:14px;font-weight:600;margin-bottom:2px}
-.npc-role{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
-.npc-dialogue{color:rgba(255,255,255,.7);font-size:12px;line-height:1.6;font-style:italic;border-left:2px solid rgba(0,212,200,.3);padding-left:10px;margin-bottom:10px}
-.npc-stats{display:flex;gap:8px}
-.stat-chip{flex:1;background:rgba(255,255,255,.05);border-radius:6px;padding:5px 8px;text-align:center}
-.stat-chip-label{font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;display:block}
-.stat-chip-val{font-size:14px;font-weight:700;font-family:monospace}
-.stat-chip-val.red{color:#ff4444}
-.stat-chip-val.green{color:#00d4c8}
-.stat-chip-val.yellow{color:#ffaa00}
-
-/* Email notifications */
-#email-notif{position:absolute;top:80px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
-.email-toast{background:rgba(5,13,20,.95);border:1px solid rgba(0,212,200,.3);border-radius:10px;padding:10px 18px;color:#fff;font-size:12px;max-width:380px;display:flex;gap:10px;align-items:center;animation:slideDown .4s ease,fadeOut .4s ease 4.5s forwards}
-.email-toast .email-icon{font-size:18px;flex-shrink:0}
-.email-toast .email-content strong{color:#00d4c8;display:block;font-size:11px;letter-spacing:1px}
-@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeOut{to{opacity:0;transform:translateY(-10px)}}
-
-/* Notification popups */
-#notif-area{position:absolute;bottom:60px;right:18px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
-.notif{background:rgba(5,13,20,.92);border-left:3px solid #00d4c8;border-radius:8px;padding:10px 14px;color:rgba(255,255,255,.85);font-size:12px;max-width:280px;animation:notifIn .35s ease,notifOut .35s ease 3.5s forwards;line-height:1.5}
-.notif.success{border-left-color:#00d4c8}
-.notif.error{border-left-color:#ff4444}
-.notif.warning{border-left-color:#ffaa00}
-@keyframes notifIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
-@keyframes notifOut{to{opacity:0;transform:translateX(30px)}}
-
-/* Shop */
-#shop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center}
-#shop.open{display:flex}
-.shop-panel{background:rgba(5,13,20,.97);border:1px solid rgba(0,212,200,.2);border-radius:20px;width:580px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column}
-.shop-head{padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
-.shop-head h2{color:#fff;font-size:18px;letter-spacing:2px}
-.shop-head .close-btn{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
-.shop-head .close-btn:hover{background:rgba(255,60,60,.2);color:#ff4444}
-.shop-npc-sel{padding:12px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
-.shop-npc-sel label{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:1px;display:block;margin-bottom:6px}
-.shop-npc-sel select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;cursor:pointer}
-.shop-items{padding:16px 24px;overflow-y:auto;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.shop-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:6px}
-.shop-item:hover:not(.disabled){border-color:rgba(0,212,200,.4);background:rgba(0,212,200,.06)}
-.shop-item.disabled{opacity:.4;cursor:not-allowed}
-.shop-item-header{display:flex;gap:10px;align-items:flex-start}
-.shop-item-icon{font-size:24px;flex-shrink:0}
-.shop-item-name{color:#fff;font-size:13px;font-weight:600}
-.shop-item-desc{color:rgba(255,255,255,.45);font-size:11px;line-height:1.4}
-.shop-item-price{color:#00d4c8;font-size:15px;font-weight:700;font-family:monospace;margin-top:4px}
-.shop-item-effect{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.effect-tag{background:rgba(0,212,200,.08);border:1px solid rgba(0,212,200,.15);color:#00d4c8;font-size:9px;border-radius:4px;padding:2px 6px;letter-spacing:.5px}
-
-/* Email system */
-#email-panel{position:fixed;right:18px;bottom:18px;background:rgba(5,13,20,.95);border:1px solid rgba(0,212,200,.2);border-radius:14px;padding:16px;width:300px;max-height:320px;overflow-y:auto;display:none;z-index:200}
-#email-panel.open{display:block}
-.email-item{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.06);margin-bottom:8px;cursor:pointer;transition:background .2s}
-.email-item:hover{background:rgba(255,255,255,.05)}
-.email-item.unread{border-left:3px solid #00d4c8}
-.email-item-subject{color:#fff;font-size:12px;font-weight:600;margin-bottom:3px}
-.email-item-from{color:rgba(255,255,255,.4);font-size:10px}
-.email-badge{position:fixed;right:18px;bottom:18px;background:#ff4444;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;z-index:201;display:none}
-
-/* Progress bar top */
-#transform-bar{position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.05);z-index:150}
-#transform-fill{height:100%;width:0%;background:linear-gradient(90deg,#ff4444 0%,#ffaa00 40%,#00d4c8 80%,#0088ff 100%);transition:width 1s ease}
-
-/* Pointer lock overlay */
-#click-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:flex;align-items:center;justify-content:center;cursor:pointer}
-#click-overlay.hidden{display:none}
-.click-msg{background:rgba(5,13,20,.9);border:1px solid rgba(0,212,200,.3);border-radius:16px;padding:30px 50px;text-align:center;color:#fff}
-.click-msg h3{font-size:20px;margin-bottom:8px;letter-spacing:2px}
-.click-msg p{color:rgba(255,255,255,.5);font-size:13px}
-.click-msg .play-icon{font-size:48px;color:#00d4c8;margin-bottom:16px}
-</style>
-</head>
-<body>
-
-<!-- SPLASH SCREEN -->
-<div id="splash">
-  <div class="splash-logo">🏢</div>
-  <div class="splash-title">INSPECTOR POSTURAL</div>
-  <div class="splash-sub">LA EMPRESA EN CRISIS</div>
-  <div class="splash-mission">
-    Eres un consultor ergonómico. <strong>5 empleados</strong> sufren dolores posturales que destruyen la productividad de la empresa.<br>
-    Usa el escáner, diagnostica y actúa antes de que sea demasiado tarde.
-  </div>
-  <div class="bar-wrap"><div class="bar-fill" id="load-bar"></div></div>
-  <div id="load-text">INICIALIZANDO SISTEMAS...</div>
-  <button class="start-btn" id="start-btn">▶ &nbsp;COMENZAR MISIÓN</button>
-</div>
-
-<!-- MAIN CANVAS -->
-<canvas id="canvas"></canvas>
-
-<!-- CLICK TO LOCK -->
-<div id="click-overlay" class="hidden">
-  <div class="click-msg">
-    <div class="play-icon">🔍</div>
-    <h3>INSPECTOR POSTURAL</h3>
-    <p>Haz clic para activar los controles</p>
-  </div>
-</div>
-
-<!-- HUD -->
-<div id="hud">
-  <div id="transform-bar"><div id="transform-fill"></div></div>
-
-  <div id="budget-panel">
-    <div class="hud-label">PRESUPUESTO</div>
-    <div class="hud-value" id="budget-val">5.000 €</div>
-  </div>
-
-  <div id="prod-panel">
-    <div class="hud-label">PRODUCTIVIDAD</div>
-    <div class="hud-value" id="prod-val">54%</div>
-    <div class="prod-bar"><div class="prod-fill" id="prod-fill" style="width:54%"></div></div>
-  </div>
-
-  <div id="xhair"><div class="dot"></div></div>
-  <div id="hint"></div>
-
-  <!-- Scanner overlay -->
-  <div id="scanner-overlay">
-    <div class="scan-vignette"></div>
-    <div class="scan-grid"></div>
-    <div class="scan-corners"></div>
-    <div id="scanner-status">ESCÁNER: INACTIVO</div>
-  </div>
-
-  <!-- Diagnostic panel -->
-  <div id="diagnostic">
-    <div class="diag-title">ANÁLISIS POSTURAL</div>
-    <div class="diag-row">
-      <div class="diag-icon ok" id="d-neck-icon">🔵</div>
-      <div class="diag-label">Cuello</div>
-      <div class="diag-angle ok" id="d-neck-val">–°</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Inspector Postural: simulador 3D de inspección ergonómica corporativa."
+    />
+    <title>Inspector Postural v3 - La Empresa en Crisis</title>
+    <link rel="stylesheet" href="/styles/main.css" />
+    <link rel="stylesheet" href="/styles/hud.css" />
+    <link rel="stylesheet" href="/styles/panels.css" />
+    <link rel="stylesheet" href="/styles/scanner.css" />
+    <link rel="stylesheet" href="/styles/animations.css" />
+  </head>
+  <body>
+    <div id="splash">
+      <div class="splash-uni-logo">
+        <img src="/logo-universidad.png" alt="Universidad" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="splash-uni-fallback" style="display:none">UNIVERSIDAD</div>
+      </div>
+      <div class="splash-logo" aria-hidden="true">🔍</div>
+      <div class="splash-title">INSPECTOR POSTURAL</div>
+      <div class="splash-sub">LA EMPRESA EN CRISIS · v3 REMASTER</div>
+      <div class="splash-mission">
+        Eres un <strong>consultor ergonómico</strong>. Cinco empleados sufren dolores posturales que destruyen la productividad.<br />
+        Diagnostica, actúa y transforma la empresa antes de que sea demasiado tarde.
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" id="load-bar"></div></div>
+      <div id="load-text">INICIALIZANDO SISTEMAS...</div>
+      <button class="start-btn" id="start-btn" type="button">▶&nbsp;&nbsp;COMENZAR MISIÓN</button>
     </div>
-    <div class="diag-row">
-      <div class="diag-icon ok" id="d-back-icon">🔵</div>
-      <div class="diag-label">Columna</div>
-      <div class="diag-angle ok" id="d-back-val">–°</div>
-    </div>
-    <div class="diag-row">
-      <div class="diag-icon ok" id="d-wrist-icon">🔵</div>
-      <div class="diag-label">Muñecas</div>
-      <div class="diag-angle ok" id="d-wrist-val">–°</div>
-    </div>
-    <div class="diag-row">
-      <div class="diag-icon ok" id="d-hours-icon">🔵</div>
-      <div class="diag-label">Horas sentado</div>
-      <div class="diag-angle ok" id="d-hours-val">–h</div>
-    </div>
-    <div class="diag-severity sev-none" id="d-severity">SIN PROBLEMAS</div>
-  </div>
 
-  <!-- NPC card -->
-  <div id="npc-card">
-    <div class="npc-avatar" id="npc-avatar">👤</div>
-    <div class="npc-name" id="npc-name">–</div>
-    <div class="npc-role" id="npc-role">–</div>
-    <div class="npc-dialogue" id="npc-dialogue">...</div>
-    <div class="npc-stats">
-      <div class="stat-chip"><span class="stat-chip-label">Fatiga</span><span class="stat-chip-val red" id="npc-fatigue">–</span></div>
-      <div class="stat-chip"><span class="stat-chip-label">Productiv.</span><span class="stat-chip-val green" id="npc-productivity">–</span></div>
-    </div>
-  </div>
+    <canvas id="canvas" aria-label="Inspector postural 3D"></canvas>
 
-  <!-- Email notifications -->
-  <div id="email-notif"></div>
-
-  <!-- Notifications -->
-  <div id="notif-area"></div>
-
-  <!-- Controls legend -->
-  <!-- Controls legend -->
-  <div id="controls">
-    <span class="ctrl-key">W</span><span class="ctrl-desc">Frente</span>
-    <span class="ctrl-key">A</span><span class="ctrl-desc">Izq.</span>
-    <span class="ctrl-key">S</span><span class="ctrl-desc">Atrás</span>
-    <span class="ctrl-key">D</span><span class="ctrl-desc">Der.</span>
-    <span class="ctrl-key">Q</span><span class="ctrl-desc">Escáner</span>
-    <span class="ctrl-key">E</span><span class="ctrl-desc">Hablar</span>
-    <span class="ctrl-key">B</span><span class="ctrl-desc">Tienda</span>
-    <span class="ctrl-key">R</span><span class="ctrl-desc">Ergonomía</span>
-    <span class="ctrl-key">T</span><span class="ctrl-desc">Stats</span>
-  </div>
-
-  <!-- D-Pad visual (bottom-left) -->
-  <div id="dpad">
-    <div class="dpad-row">
-      <div class="dpad-btn" id="btn-w" data-key="KeyW">
-        <div class="dpad-arrow">&#9650;</div>
-        <div class="dpad-label">W &middot; FRENTE</div>
+    <div id="click-overlay" class="hidden">
+      <div class="click-msg">
+        <div class="play-icon" aria-hidden="true">🔍</div>
+        <h3>INSPECTOR POSTURAL</h3>
+        <p>Haz clic para activar los controles</p>
       </div>
     </div>
-    <div class="dpad-row">
-      <div class="dpad-btn" id="btn-a" data-key="KeyA">
-        <div class="dpad-arrow">&#9664;</div>
-        <div class="dpad-label">A &middot; IZQ.</div>
+
+    <div id="hud">
+      <div id="transform-bar"><div id="transform-fill"></div></div>
+
+      <div id="health-bar-wrap">
+        <div class="health-label">SALUD ERGONÓMICA EMPRESARIAL</div>
+        <div class="health-track"><div id="health-fill"></div></div>
       </div>
-      <div class="dpad-center"></div>
-      <div class="dpad-btn" id="btn-d" data-key="KeyD">
-        <div class="dpad-arrow">&#9654;</div>
-        <div class="dpad-label">D &middot; DER.</div>
-      </div>
-    </div>
-    <div class="dpad-row">
-      <div class="dpad-btn" id="btn-s" data-key="KeyS">
-        <div class="dpad-arrow">&#9660;</div>
-        <div class="dpad-label">S &middot; ATRÁS</div>
-      </div>
-    </div>
-    <div class="dpad-action-row">
-      <div class="dpad-action-btn" id="btn-q" data-key="KeyQ"><span>Q</span> Escáner</div>
-      <div class="dpad-action-btn" id="btn-e" data-key="KeyE"><span>E</span> Hablar</div>
-      <div class="dpad-action-btn" id="btn-b" data-key="KeyB"><span>B</span> Tienda</div>
-    </div>
-  </div>
-</div>
 
-<!-- SHOP MODAL -->
-<div id="shop">
-  <div class="shop-panel">
-    <div class="shop-head">
-      <h2>🛒 TIENDA ERGONÓMICA</h2>
-      <button class="close-btn" id="shop-close">✕</button>
-    </div>
-    <div class="shop-npc-sel">
-      <label>DESTINAR A EMPLEADO</label>
-      <select id="shop-npc-sel">
-        <option value="all">Todos los empleados</option>
-      </select>
-    </div>
-    <div class="shop-items" id="shop-items-list"></div>
-  </div>
-</div>
-
-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.155.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.155.0/examples/jsm/"}}</script>
-
-<script type="module">
-import * as THREE from 'three';
-
-// ═══════════════════════════════════════════════
-// GAME STATE
-// ═══════════════════════════════════════════════
-const state = {
-  budget: 5000,
-  productivity: 54,
-  transformLevel: 0,
-  scannerActive: false,
-  isLocked: false,
-  selectedNPC: null,
-  shopOpen: false,
-  emailOpen: false,
-  gameStarted: false,
-  totalPurchases: 0,
-  emails: [],
-  unreadEmails: 0,
-  notifications: [],
-  scannedNPCs: new Set(),
-};
-
-// ═══════════════════════════════════════════════
-// NPC DATA
-// ═══════════════════════════════════════════════
-const NPC_DATA = [
-  {
-    id:'npc_001', name:'Carlos Mendoza', role:'Call Center', emoji:'😟',
-    position:{x:5.5,z:6.5},
-    posture:{neck:25,spine:18,wrist:22,elbow:85}, seatedHours:5.2,
-    fatigue:70, productivity:45, healthy:false,
-    dialogue:{
-      greeting:'Llevo 5 horas sin levantarme. Siento la espalda rígida.',
-      pain:'Me duele el cuello y la zona lumbar constantemente.',
-      need:'Necesito urgente una silla ergonómica y soporte para monitor.'
-    }
-  },
-  {
-    id:'npc_002', name:'Ana Ramírez', role:'Diseño Gráfico', emoji:'😣',
-    position:{x:-5.5,z:6.5},
-    posture:{neck:15,spine:12,wrist:28,elbow:80}, seatedHours:3.1,
-    fatigue:45, productivity:65, healthy:false,
-    dialogue:{
-      greeting:'Mis muñecas duelen de usar la tableta todo el día.',
-      pain:'Tengo hormigueo en los dedos y brazos.',
-      need:'Un reposamuñecas y ajustar la altura de la silla me ayudaría.'
-    }
-  },
-  {
-    id:'npc_003', name:'Laura Fernández', role:'Recursos Humanos', emoji:'😩',
-    position:{x:-5.5,z:-5.5},
-    posture:{neck:30,spine:22,wrist:10,elbow:95}, seatedHours:6.3,
-    fatigue:80, productivity:35, healthy:false,
-    dialogue:{
-      greeting:'Tengo migrañas constantes por la postura frente al monitor.',
-      pain:'Toda la espalda me duele, especialmente los hombros.',
-      need:'Necesito el monitor a la altura correcta y pausas activas.'
-    }
-  },
-  {
-    id:'npc_004', name:'Roberto Díaz', role:'Administración', emoji:'😊',
-    position:{x:5.5,z:-5.5},
-    posture:{neck:10,spine:8,wrist:8,elbow:92}, seatedHours:2.0,
-    fatigue:25, productivity:85, healthy:true,
-    dialogue:{
-      greeting:'Me siento bien, mi silla nueva es excelente.',
-      pain:'Sin dolores hoy, gracias a los ajustes que hice.',
-      need:'Estoy muy cómodo, pero mis compañeros sí necesitan ayuda.'
-    }
-  },
-  {
-    id:'npc_005', name:'Sofía Castillo', role:'Recepción', emoji:'😕',
-    position:{x:0,z:-11.5},
-    posture:{neck:20,spine:14,wrist:15,elbow:88}, seatedHours:4.0,
-    fatigue:55, productivity:60, healthy:false,
-    dialogue:{
-      greeting:'Atiendo a mucha gente pero mi silla es muy incómoda.',
-      pain:'La zona lumbar me duele al final del turno.',
-      need:'Necesito una silla con soporte lumbar adecuado.'
-    }
-  }
-];
-
-// ═══════════════════════════════════════════════
-// SHOP ITEMS
-// ═══════════════════════════════════════════════
-const SHOP_ITEMS = [
-  {id:'ergonomic_chair',name:'Silla Ergonómica',desc:'Soporte lumbar ajustable y reposabrazos regulables',icon:'🪑',price:450,category:'furniture',effects:{spine:-10,neck:-5,fatigue:-20,prod:15},tags:['espalda','lumbar','postura']},
-  {id:'monitor_stand',name:'Soporte Monitor',desc:'Eleva la pantalla al nivel de los ojos',icon:'🖥️',price:120,category:'accessory',effects:{neck:-15,spine:-5,fatigue:-10,prod:10},tags:['cuello','cabeza','monitor']},
-  {id:'wrist_rest',name:'Reposamuñecas',desc:'Almohadilla ergonómica para teclado',icon:'⌨️',price:35,category:'accessory',effects:{wrist:-12,fatigue:-8,prod:8},tags:['muñecas','dedos','manos']},
-  {id:'footrest',name:'Reposapiés',desc:'Apoya los pies en ángulo correcto (90°)',icon:'🦶',price:65,category:'accessory',effects:{spine:-5,fatigue:-12,prod:5},tags:['piernas','circulación']},
-  {id:'standing_desk',name:'Mesa Elevable',desc:'Permite alternar trabajo de pie y sentado',icon:'📐',price:350,category:'furniture',effects:{spine:-20,neck:-10,fatigue:-25,prod:20},tags:['todo','premium']},
-  {id:'active_break',name:'Pausas Activas',desc:'Programa de estiramientos guiados cada 2h',icon:'🧘',price:200,category:'training',effects:{fatigue:-30,prod:15},tags:['todos','fatiga']},
-  {id:'office_lighting',name:'Iluminación LED',desc:'Luz de espectro completo, sin parpadeo',icon:'💡',price:500,category:'environment',effects:{fatigue:-15,prod:10},tags:['ojos','global']},
-  {id:'ergo_training',name:'Formación Ergonómica',desc:'Taller de higiene postural para el equipo',icon:'📚',price:300,category:'training',effects:{neck:-5,spine:-5,prod:12},tags:['conciencia','todos']}
-];
-
-// Email content
-const EMAILS_DATA = [
-  {id:'e1',subject:'URGENTE: Bajas por dolor lumbar',from:'RRHH',content:'Aumento del 40% en bajas por dolores de espalda este mes. Se requiere evaluación inmediata.',category:'urgent',triggerType:'immediate'},
-  {id:'e2',subject:'Reunión de emergencia del Sindicato',from:'Comité de Trabajadores',content:'Los empleados han reportado condiciones insatisfactorias. Necesitamos una reunión urgente.',category:'warning',triggerType:'scan',triggerVal:2},
-  {id:'e3',subject:'Presupuesto extra aprobado',from:'Dirección General',content:'Se aprueba presupuesto adicional de 500€ para mejoras ergonómicas. ¡Bien hecho!',category:'positive',triggerType:'purchase',triggerVal:1},
-  {id:'e4',subject:'Reporte: Productividad en recuperación',from:'Business Analytics',content:'Los datos muestran mejora del 15% en productividad. La inversión está dando resultados.',category:'report',triggerType:'productivity',triggerVal:65},
-  {id:'e5',subject:'¡Felicitaciones del CEO!',from:'CEO – Global Corp',content:'La empresa está viendo resultados extraordinarios. Han transformado nuestro ambiente laboral.',category:'positive',triggerType:'productivity',triggerVal:80},
-];
-
-// ═══════════════════════════════════════════════
-// THREE.JS SETUP
-// ═══════════════════════════════════════════════
-const canvas = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x050d14);
-scene.fog = new THREE.FogExp2(0x0a1628, 0.025);
-
-const camera = new THREE.PerspectiveCamera(72, window.innerWidth/window.innerHeight, 0.1, 200);
-camera.position.set(0, 1.65, 2);
-
-const clock = new THREE.Clock();
-const raycaster = new THREE.Raycaster();
-const center = new THREE.Vector2(0,0);
-
-// ═══════════════════════════════════════════════
-// LIGHTING
-// ═══════════════════════════════════════════════
-function setupLighting(){
-  const ambient = new THREE.AmbientLight(0x304060, 0.7);
-  scene.add(ambient);
-
-  const sun = new THREE.DirectionalLight(0xfff0e0, 1.3);
-  sun.position.set(8, 12, 6);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(2048,2048);
-  sun.shadow.camera.near = 0.5;
-  sun.shadow.camera.far = 40;
-  sun.shadow.camera.left = -18;
-  sun.shadow.camera.right = 18;
-  sun.shadow.camera.top = 18;
-  sun.shadow.camera.bottom = -18;
-  sun.shadow.bias = -0.001;
-  scene.add(sun);
-
-  // Ceiling fill lights (office style)
-  const ceilPositions = [
-    [-7,-7],[0,-7],[7,-7],
-    [-7,0],[0,0],[7,0],
-    [-7,7],[0,7],[7,7]
-  ];
-  ceilPositions.forEach(([x,z])=>{
-    const l = new THREE.PointLight(0xfff5e0,0.5,8,1.5);
-    l.position.set(x,2.9,z);
-    scene.add(l);
-  });
-
-  // Teal accent fill
-  const accent1 = new THREE.PointLight(0x004488,0.3,15);
-  accent1.position.set(-14,2,-14);
-  scene.add(accent1);
-  const accent2 = new THREE.PointLight(0x002244,0.3,15);
-  accent2.position.set(14,2,14);
-  scene.add(accent2);
-}
-setupLighting();
-
-// ═══════════════════════════════════════════════
-// SCENE GEOMETRY
-// ═══════════════════════════════════════════════
-function buildScene(){
-  // Floor
-  const floorGeo = new THREE.PlaneGeometry(32,32);
-  const floorMat = new THREE.MeshStandardMaterial({color:0x1a2535,roughness:0.85,metalness:0.05});
-  const floor = new THREE.Mesh(floorGeo,floorMat);
-  floor.rotation.x = -Math.PI/2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  // Floor tiles
-  const tileGeo = new THREE.PlaneGeometry(1.9,1.9);
-  const tileMat = new THREE.MeshStandardMaterial({color:0x1e2d3e,roughness:0.7});
-  for(let x=-7;x<=7;x+=2) for(let z=-7;z<=7;z+=2){
-    const tile = new THREE.Mesh(tileGeo,tileMat);
-    tile.rotation.x = -Math.PI/2;
-    tile.position.set(x,0.001,z);
-    tile.receiveShadow = true;
-    scene.add(tile);
-  }
-
-  // Walls
-  const wallMat = new THREE.MeshStandardMaterial({color:0xd0d8e0,roughness:0.6});
-  const wallDark = new THREE.MeshStandardMaterial({color:0x2a3548,roughness:0.5});
-  const walls=[
-    {pos:[-16,1.5,0],w:0.3,h:3,d:32,mat:wallDark},
-    {pos:[16,1.5,0],w:0.3,h:3,d:32,mat:wallDark},
-    {pos:[0,1.5,-16],w:32,h:3,d:0.3,mat:wallMat},
-    {pos:[0,1.5,16],w:32,h:3,d:0.3,mat:wallDark},
-  ];
-  walls.forEach(({pos,w,h,d,mat})=>{
-    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
-    m.position.set(...pos);
-    m.receiveShadow=true;
-    scene.add(m);
-  });
-
-  // Ceiling
-  const ceilMat = new THREE.MeshStandardMaterial({color:0xf0f2f5,roughness:0.4});
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(32,32),ceilMat);
-  ceil.rotation.x = Math.PI/2;
-  ceil.position.y = 3;
-  scene.add(ceil);
-
-  // Ceiling tiles grid
-  const ctGeo = new THREE.BoxGeometry(1.95,0.04,1.95);
-  const ctMat = new THREE.MeshStandardMaterial({color:0xe8eaec,roughness:0.5});
-  for(let x=-7;x<=7;x+=2) for(let z=-7;z<=7;z+=2){
-    const ct=new THREE.Mesh(ctGeo,ctMat);
-    ct.position.set(x,2.88,z);
-    scene.add(ct);
-  }
-
-  // Windows – exterior blue glow
-  const winMat = new THREE.MeshStandardMaterial({color:0x87ceeb,transparent:true,opacity:0.55,roughness:0.1,metalness:0.8,emissive:0x2266aa,emissiveIntensity:0.4});
-  const winPositions=[[15.85,1.5,-6],[15.85,1.5,0],[15.85,1.5,6]];
-  winPositions.forEach(([x,y,z])=>{
-    const w=new THREE.Mesh(new THREE.BoxGeometry(0.15,1.6,1.8),winMat);
-    w.position.set(x,y,z);
-    scene.add(w);
-    const wl=new THREE.PointLight(0x4488ff,0.3,6);
-    wl.position.set(x-1,y,z);
-    scene.add(wl);
-  });
-
-  // Interior divider walls
-  const divMat = new THREE.MeshStandardMaterial({color:0xbbc5cf,roughness:0.6});
-  const dividers=[
-    {pos:[-1.5,1.2,-3.5],w:3,h:2.4,d:0.15},
-    {pos:[1.5,1.2,-3.5],w:0.15,h:2.4,d:3},
-    {pos:[-4,1.2,1],w:0.15,h:2.4,d:5},
-    {pos:[4,1.2,1],w:0.15,h:2.4,d:5},
-  ];
-  dividers.forEach(({pos,w,h,d})=>{
-    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),divMat);
-    m.position.set(...pos);
-    m.castShadow=true;
-    m.receiveShadow=true;
-    scene.add(m);
-  });
-
-  buildFurniture();
-  buildDecorations();
-}
-
-function buildFurniture(){
-  const deskMat = new THREE.MeshStandardMaterial({color:0x7c5c3e,roughness:0.5});
-  const deskTopMat = new THREE.MeshStandardMaterial({color:0x9a7351,roughness:0.4});
-  const chairMat = new THREE.MeshStandardMaterial({color:0x223344,roughness:0.5,metalness:0.1});
-  const screenMat = new THREE.MeshStandardMaterial({color:0x111827,roughness:0.2,metalness:0.5});
-  const screenGlowMat = new THREE.MeshStandardMaterial({color:0x1a3a6b,emissive:0x2244aa,emissiveIntensity:0.6,roughness:0.1});
-
-  NPC_DATA.forEach(npc=>{
-    const {x,z} = npc.position;
-    const grp = new THREE.Group();
-
-    // Desk – legs
-    const legGeo = new THREE.BoxGeometry(0.06,0.73,0.06);
-    [[-0.65,-0.35,-0.45],[0.65,-0.35,-0.45],[-0.65,-0.35,0.45],[0.65,-0.35,0.45]].forEach(([lx,ly,lz])=>{
-      const leg=new THREE.Mesh(legGeo,deskMat);
-      leg.position.set(lx,ly,lz);
-      leg.castShadow=true;
-      grp.add(leg);
-    });
-    // Desk – top
-    const top=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.07,0.95),deskTopMat);
-    top.castShadow=true; top.receiveShadow=true;
-    grp.add(top);
-
-    // Monitor
-    const monBase=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.04,0.22),screenMat);
-    monBase.position.set(0.05,0.07,-0.2);
-    grp.add(monBase);
-    const monStand=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.3,0.04),screenMat);
-    monStand.position.set(0.05,0.22,-0.2);
-    grp.add(monStand);
-    const monScreen=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.38,0.04),screenGlowMat);
-    const neckBad = npc.posture.neck>20;
-    monScreen.position.set(0.05, neckBad ? 0.28 : 0.42,-0.2); // bad = screen too low
-    grp.add(monScreen);
-
-    // Keyboard
-    const keyGeo=new THREE.BoxGeometry(0.42,0.015,0.16);
-    const keyMat=new THREE.MeshStandardMaterial({color:0x303848,roughness:0.4});
-    const key=new THREE.Mesh(keyGeo,keyMat);
-    key.position.set(0.05,0.045,0.2);
-    key.rotation.x = npc.posture.wrist>15 ? -0.1 : 0; // slight wrist angle
-    grp.add(key);
-
-    // Chair
-    const seat=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.08,0.5),chairMat);
-    seat.position.set(0,-0.4,0.55);
-    seat.castShadow=true;
-    grp.add(seat);
-    const back=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.42,0.07),chairMat);
-    const spineBad = npc.posture.spine>15;
-    back.position.set(0,-0.18,0.31);
-    back.rotation.x = spineBad ? 0.25 : 0.05; // bad = tilted back
-    back.castShadow=true;
-    grp.add(back);
-
-    grp.position.set(x,0.73,z);
-    scene.add(grp);
-  });
-}
-
-function buildDecorations(){
-  // Plants
-  const potMat = new THREE.MeshStandardMaterial({color:0x7a4e2d,roughness:0.8});
-  const leafMat = new THREE.MeshStandardMaterial({color:0x2d7a3d,roughness:0.6});
-  const plantPos=[[-13,-13],[13,-13],[-13,13],[13,13],[-9,0],[9,0]];
-  plantPos.forEach(([x,z])=>{
-    const grp=new THREE.Group();
-    const pot=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.14,0.3,8),potMat);
-    pot.position.y=0.15;
-    grp.add(pot);
-    // Leaves – 3 cones
-    for(let i=0;i<3;i++){
-      const h=0.35+i*0.18;
-      const r=0.22-i*0.04;
-      const leaf=new THREE.Mesh(new THREE.ConeGeometry(r,h,7),leafMat);
-      leaf.position.set(0,0.3+i*0.25,0);
-      leaf.castShadow=true;
-      grp.add(leaf);
-    }
-    grp.position.set(x,0,z);
-    scene.add(grp);
-  });
-
-  // Whiteboard
-  const wbFrame = new THREE.Mesh(new THREE.BoxGeometry(3,1.4,0.07),new THREE.MeshStandardMaterial({color:0x555,roughness:0.4,metalness:0.6}));
-  wbFrame.position.set(-8,1.5,-15.8);
-  scene.add(wbFrame);
-  const wbBoard = new THREE.Mesh(new THREE.BoxGeometry(2.8,1.2,0.02),new THREE.MeshStandardMaterial({color:0xfafafa,roughness:0.2}));
-  wbBoard.position.set(-8,1.5,-15.75);
-  scene.add(wbBoard);
-
-  // Reception counter
-  const counterMat = new THREE.MeshStandardMaterial({color:0x4a3a2a,roughness:0.5});
-  const counter = new THREE.Mesh(new THREE.BoxGeometry(3,1,0.7),counterMat);
-  counter.position.set(0,0.5,-13);
-  counter.castShadow=true;
-  scene.add(counter);
-}
-
-buildScene();
-
-// ═══════════════════════════════════════════════
-// NPC CREATION (improved humanoid shapes)
-// ═══════════════════════════════════════════════
-const npcMeshes = [];
-
-function buildNPCColor(idx){
-  const colors=[0x4a7fc7,0xc74a7f,0x7fc74a,0xc7a34a,0x7f4ac7];
-  return colors[idx%colors.length];
-}
-
-function createNPC(data, idx){
-  const grp = new THREE.Group();
-  grp.userData = {type:'npc', isNPC:true, npcData:data};
-
-  const bodyColor = buildNPCColor(idx);
-  const skinColor = 0xf0c890;
-  const hairColors=[0x2c1a0e,0x4a3520,0x8B4513,0x1a1a1a,0x654321];
-
-  const bodyMat = new THREE.MeshStandardMaterial({color:bodyColor,roughness:0.4,metalness:0.05});
-  const skinMat = new THREE.MeshStandardMaterial({color:skinColor,roughness:0.3,metalness:0.02});
-  const hairMat = new THREE.MeshStandardMaterial({color:hairColors[idx%hairColors.length],roughness:0.6});
-  const shoesMat = new THREE.MeshStandardMaterial({color:0x222222,roughness:0.7});
-
-  // Torso (with slight spine curve baked in)
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.42,0.55,0.24),bodyMat);
-  torso.position.set(0,0.77,0);
-  torso.rotation.x = (data.posture.spine/100)*0.22;
-  torso.castShadow=true;
-  grp.add(torso);
-
-  // Shoulders (wider at top)
-  const shoulderMat = new THREE.MeshStandardMaterial({color:bodyColor,roughness:0.4});
-  const shoulder = new THREE.Mesh(new THREE.BoxGeometry(0.55,0.12,0.22),shoulderMat);
-  shoulder.position.set(0,1.02,0);
-  grp.add(shoulder);
-
-  // Head – slightly more realistic with elongated sphere
-  const headGroup = new THREE.Group();
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.175,16,12),skinMat);
-  head.scale.y = 1.12;
-  head.castShadow=true;
-  headGroup.add(head);
-
-  // Neck offset based on posture
-  const neckLean = (data.posture.neck-15)*0.006;
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.18,12,8,0,Math.PI*2,0,Math.PI*0.55),hairMat);
-  hair.position.y = 0.05;
-  headGroup.add(hair);
-
-  // Face – subtle: 2 eyes
-  const eyeGeo = new THREE.SphereGeometry(0.025,6,6);
-  const eyeMat = new THREE.MeshStandardMaterial({color:0x111111});
-  const eyeL = new THREE.Mesh(eyeGeo,eyeMat);
-  eyeL.position.set(-0.065,0.02,0.165);
-  headGroup.add(eyeL);
-  const eyeR = eyeL.clone();
-  eyeR.position.x = 0.065;
-  headGroup.add(eyeR);
-
-  // Expression based on health
-  if(!data.healthy){
-    // Frown brows
-    const browGeo = new THREE.BoxGeometry(0.07,0.012,0.02);
-    const browMat = new THREE.MeshStandardMaterial({color:hairColors[idx%hairColors.length]});
-    const browL = new THREE.Mesh(browGeo,browMat);
-    browL.position.set(-0.065,0.07,0.163);
-    browL.rotation.z = 0.25;
-    headGroup.add(browL);
-    const browR = browL.clone();
-    browR.position.x = 0.065;
-    browR.rotation.z = -0.25;
-    headGroup.add(browR);
-  }
-
-  headGroup.position.set(neckLean,1.18+neckLean*0.3,0);
-  headGroup.userData={bodyPart:'head'};
-  grp.add(headGroup);
-
-  // Neck
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.065,0.075,0.1,8),skinMat);
-  neck.position.set(neckLean,1.08,0);
-  neck.userData={bodyPart:'neck'};
-  grp.add(neck);
-
-  // Arms
-  const armGeo = new THREE.BoxGeometry(0.1,0.45,0.1);
-  const forearmGeo = new THREE.BoxGeometry(0.09,0.35,0.09);
-  const handGeo = new THREE.SphereGeometry(0.06,8,6);
-
-  const elbowFactor = (data.posture.elbow-90)/90;
-
-  const leftArm = new THREE.Group();
-  const laUpper = new THREE.Mesh(armGeo,bodyMat);
-  laUpper.position.set(0,-0.22,0);
-  laUpper.castShadow=true;
-  leftArm.add(laUpper);
-  const laFore = new THREE.Mesh(forearmGeo,skinMat);
-  laFore.position.set(0.05,-0.55,0.12);
-  laFore.rotation.x=-0.4-elbowFactor*0.2;
-  leftArm.add(laFore);
-  const laHand = new THREE.Mesh(handGeo,skinMat);
-  laHand.position.set(0.08,-0.72,0.2);
-  laHand.userData={bodyPart:'wrist_left'};
-  leftArm.add(laHand);
-  leftArm.position.set(-0.27,1.0,0);
-  leftArm.userData={bodyPart:'arm_left'};
-  grp.add(leftArm);
-
-  const rightArm = new THREE.Group();
-  const raUpper = new THREE.Mesh(armGeo,bodyMat);
-  raUpper.position.set(0,-0.22,0);
-  raUpper.castShadow=true;
-  rightArm.add(raUpper);
-  const raFore = new THREE.Mesh(forearmGeo,skinMat);
-  raFore.position.set(-0.05,-0.55,0.12);
-  raFore.rotation.x=-0.4-elbowFactor*0.2;
-  rightArm.add(raFore);
-  const raHand = new THREE.Mesh(handGeo,skinMat);
-  raHand.position.set(-0.08,-0.72,0.2);
-  raHand.userData={bodyPart:'wrist_right'};
-  rightArm.add(raHand);
-  rightArm.position.set(0.27,1.0,0);
-  rightArm.userData={bodyPart:'arm_right'};
-  grp.add(rightArm);
-
-  // Lower body / legs (seated, simplified)
-  const legMat = new THREE.MeshStandardMaterial({color:bodyColor,roughness:0.5});
-  const thighGeo = new THREE.BoxGeometry(0.17,0.1,0.45);
-  const lLeg=new THREE.Mesh(thighGeo,legMat);
-  lLeg.position.set(-0.11,0.34,0.2);
-  lLeg.castShadow=true;
-  grp.add(lLeg);
-  const rLeg=new THREE.Mesh(thighGeo,legMat);
-  rLeg.position.set(0.11,0.34,0.2);
-  rLeg.castShadow=true;
-  grp.add(rLeg);
-
-  // Shoes
-  const shoeGeo = new THREE.BoxGeometry(0.13,0.08,0.26);
-  const lShoe=new THREE.Mesh(shoeGeo,shoesMat);
-  lShoe.position.set(-0.11,0.04,0.42);
-  grp.add(lShoe);
-  const rShoe=new THREE.Mesh(shoeGeo,shoesMat);
-  rShoe.position.set(0.11,0.04,0.42);
-  grp.add(rShoe);
-
-  // Name label (floating)
-  const labelCanvas = document.createElement('canvas');
-  labelCanvas.width=256; labelCanvas.height=64;
-  const ctx=labelCanvas.getContext('2d');
-  ctx.fillStyle='rgba(5,13,20,0.85)';
-  ctx.roundRect(4,4,248,56,12);
-  ctx.fill();
-  ctx.strokeStyle='rgba(0,212,200,0.5)';
-  ctx.lineWidth=1;
-  ctx.roundRect(4,4,248,56,12);
-  ctx.stroke();
-  ctx.fillStyle='#ffffff';
-  ctx.font='bold 18px Segoe UI';
-  ctx.textAlign='center';
-  ctx.fillText(data.name,128,28);
-  ctx.fillStyle='rgba(0,212,200,0.8)';
-  ctx.font='13px Segoe UI';
-  ctx.fillText(data.role,128,48);
-  const lblTex = new THREE.CanvasTexture(labelCanvas);
-  const lblMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.9,0.22),
-    new THREE.MeshBasicMaterial({map:lblTex,transparent:true,depthWrite:false})
-  );
-  lblMesh.position.set(0,1.55,0);
-  lblMesh.userData={isLabel:true};
-  grp.add(lblMesh);
-
-  // Pain indicator (red pulsing ring above head if unhealthy)
-  if(!data.healthy){
-    const ringGeo = new THREE.TorusGeometry(0.15,0.015,6,16);
-    const ringMat = new THREE.MeshBasicMaterial({color:0xff3333,transparent:true,opacity:0.8});
-    const ring = new THREE.Mesh(ringGeo,ringMat);
-    ring.position.set(0,1.75,0);
-    ring.userData={isPainRing:true, baseY:1.75};
-    grp.add(ring);
-  }
-
-  grp.position.set(data.position.x, 0, data.position.z);
-  // Face the desk
-  grp.rotation.y = Math.atan2(-(0 - data.position.x), -(0 - data.position.z)) + Math.PI;
-
-  scene.add(grp);
-  npcMeshes.push(grp);
-  return grp;
-}
-
-NPC_DATA.forEach((data,i) => createNPC(data,i));
-
-// ═══════════════════════════════════════════════
-// PLAYER CONTROLLER (pointer lock FPS)
-// ═══════════════════════════════════════════════
-const keys={};
-const euler = new THREE.Euler(0,0,0,'YXZ');
-const moveVec = new THREE.Vector3();
-const camSpeed = 5.0;
-let yaw=0, pitch=0;
-
-document.addEventListener('keydown', e=>{
-  keys[e.code]=true;
-  if(!state.gameStarted) return;
-  if(e.code==='KeyQ') toggleScanner();
-  if(e.code==='KeyB') toggleShop();
-  if(e.code==='KeyE') tryInteract();
-  if(e.code==='Escape' && state.shopOpen) closeShop();
-});
-document.addEventListener('keyup', e=>{ keys[e.code]=false; });
-
-canvas.addEventListener('click', ()=>{
-  if(!state.gameStarted) return;
-  if(!state.isLocked) canvas.requestPointerLock();
-});
-
-document.addEventListener('pointerlockchange', ()=>{
-  state.isLocked = (document.pointerLockElement===canvas);
-  document.getElementById('click-overlay').classList.toggle('hidden', state.isLocked);
-});
-
-document.addEventListener('mousemove', e=>{
-  if(!state.isLocked) return;
-  yaw -= e.movementX * 0.0018;
-  pitch -= e.movementY * 0.0018;
-  pitch = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.5, pitch));
-});
-
-function updatePlayer(dt){
-  if(!state.isLocked || !state.gameStarted) return;
-  const speed = keys['ShiftLeft']||keys['ShiftRight'] ? camSpeed*1.8 : camSpeed;
-  moveVec.set(0,0,0);
-  if(keys['KeyW']||keys['ArrowUp']) moveVec.z-=1;
-  if(keys['KeyS']||keys['ArrowDown']) moveVec.z+=1;
-  if(keys['KeyA']||keys['ArrowLeft']) moveVec.x-=1;
-  if(keys['KeyD']||keys['ArrowRight']) moveVec.x+=1;
-  if(moveVec.length()>0) moveVec.normalize();
-  moveVec.multiplyScalar(speed*dt);
-  camera.position.x += moveVec.x*Math.cos(yaw)-moveVec.z*Math.sin(yaw);
-  camera.position.z += moveVec.x*Math.sin(yaw)+moveVec.z*Math.cos(yaw);
-  // Clamp to room
-  camera.position.x = Math.max(-14, Math.min(14, camera.position.x));
-  camera.position.z = Math.max(-14, Math.min(14, camera.position.z));
-  camera.position.y = 1.65;
-  euler.set(pitch,yaw,0,'YXZ');
-  camera.quaternion.setFromEuler(euler);
-}
-
-// ═══════════════════════════════════════════════
-// SCANNER SYSTEM
-// ═══════════════════════════════════════════════
-function toggleScanner(){
-  state.scannerActive = !state.scannerActive;
-  const overlay = document.getElementById('scanner-overlay');
-  const status = document.getElementById('scanner-status');
-  const diag = document.getElementById('diagnostic');
-  if(state.scannerActive){
-    overlay.classList.add('active');
-    status.textContent='ESCÁNER: ACTIVO';
-    status.classList.add('active-status');
-    diag.classList.add('visible');
-    showNotif('Escáner postural activado. Apunta a un empleado.','info');
-  } else {
-    overlay.classList.remove('active');
-    status.textContent='ESCÁNER: INACTIVO';
-    status.classList.remove('active-status');
-    diag.classList.remove('visible');
-    clearNPCHighlights();
-    document.getElementById('npc-card').classList.remove('visible');
-    state.selectedNPC=null;
-  }
-}
-
-let lastScannedId=null;
-function updateScanner(){
-  if(!state.scannerActive || !state.gameStarted) return;
-  raycaster.setFromCamera(center,camera);
-  const hits = raycaster.intersectObjects(npcMeshes, true);
-  let foundNPC=null;
-  for(const h of hits){
-    let obj=h.object;
-    while(obj.parent){
-      if(obj.userData?.isNPC) { foundNPC=obj; break; }
-      obj=obj.parent;
-    }
-    if(foundNPC) break;
-  }
-
-  if(foundNPC){
-    const dist = camera.position.distanceTo(foundNPC.position);
-    if(dist > 9){
-      updateDiagnosticEmpty();
-      document.getElementById('scanner-status').textContent='ESCÁNER: FUERA DE RANGO';
-      return;
-    }
-    const npcData=foundNPC.userData.npcData;
-    if(npcData.id!==lastScannedId){
-      lastScannedId=npcData.id;
-      state.scannedNPCs.add(npcData.id);
-      highlightNPC(foundNPC, npcData);
-      updateDiagnosticUI(npcData);
-      showNPCCard(npcData);
-      checkEmailTrigger('scan', state.scannedNPCs.size);
-    }
-    document.getElementById('scanner-status').textContent=`ESCANER: ${npcData.name.toUpperCase()}`;
-  } else {
-    if(lastScannedId!==null){
-      lastScannedId=null;
-      clearNPCHighlights();
-      updateDiagnosticEmpty();
-      document.getElementById('npc-card').classList.remove('visible');
-      document.getElementById('scanner-status').textContent='ESCÁNER: ACTIVO';
-    }
-  }
-}
-
-const highlightedMeshes = [];
-function highlightNPC(grp, data){
-  clearNPCHighlights();
-  const color = data.healthy ? 0x00cc88 : 0xff2222;
-  const emissive = data.healthy ? 0x00aa55 : 0xcc1100;
-  grp.traverse(c=>{
-    if(c.isMesh && !c.userData?.isLabel){
-      if(!c.userData._origEmissive){
-        c.userData._origEmissive = c.material.emissive?.getHex() ?? 0;
-        c.userData._origEmissiveInt = c.material.emissiveIntensity ?? 0;
-      }
-      c.material = c.material.clone();
-      c.material.emissive = new THREE.Color(emissive);
-      c.material.emissiveIntensity = 0.45;
-      highlightedMeshes.push(c);
-    }
-  });
-}
-function clearNPCHighlights(){
-  highlightedMeshes.forEach(c=>{
-    c.material.emissiveIntensity = c.userData._origEmissiveInt ?? 0;
-    c.material.emissive = new THREE.Color(c.userData._origEmissive ?? 0);
-  });
-  highlightedMeshes.length=0;
-}
-
-function updateDiagnosticUI(data){
-  const {posture,seatedHours} = data;
-  setDiagRow('neck', posture.neck, 20, `${posture.neck}°`);
-  setDiagRow('back', posture.spine, 15, `${posture.spine}°`);
-  setDiagRow('wrist', posture.wrist, 15, `${posture.wrist}°`);
-  setDiagRow('hours', seatedHours, 4, `${seatedHours.toFixed(1)}h`);
-
-  const issues = [posture.neck>20, posture.spine>15, posture.wrist>15, seatedHours>4].filter(Boolean).length;
-  const sev = document.getElementById('d-severity');
-  if(issues===0){sev.textContent='POSTURA CORRECTA';sev.className='diag-severity sev-none';}
-  else if(issues<=2){sev.textContent='RIESGO MODERADO';sev.className='diag-severity sev-low';}
-  else{sev.textContent='RIESGO ALTO ⚠';sev.className='diag-severity sev-high';}
-}
-function setDiagRow(part, val, threshold, display){
-  const icon=document.getElementById(`d-${part}-icon`);
-  const valEl=document.getElementById(`d-${part}-val`);
-  const bad=val>threshold;
-  if(icon){icon.className=`diag-icon ${bad?'bad':'ok'}`;icon.textContent=bad?'🔴':'🟢';}
-  if(valEl){valEl.textContent=display;valEl.className=`diag-angle ${bad?'bad':'ok'}`;}
-}
-function updateDiagnosticEmpty(){
-  ['neck','back','wrist','hours'].forEach(p=>{
-    const i=document.getElementById(`d-${p}-icon`);
-    const v=document.getElementById(`d-${p}-val`);
-    if(i){i.className='diag-icon ok';i.textContent='🔵';}
-    if(v){v.textContent='–';v.className='diag-angle ok';}
-  });
-  const sev=document.getElementById('d-severity');
-  sev.textContent='APUNTA A UN EMPLEADO';
-  sev.className='diag-severity sev-none';
-}
-
-function showNPCCard(data){
-  document.getElementById('npc-avatar').textContent=data.emoji;
-  document.getElementById('npc-name').textContent=data.name;
-  document.getElementById('npc-role').textContent=data.role;
-  const dlg = data.healthy ? data.dialogue.greeting : data.dialogue.pain;
-  document.getElementById('npc-dialogue').textContent=`"${dlg}"`;
-  const fatigueEl=document.getElementById('npc-fatigue');
-  const prodEl=document.getElementById('npc-productivity');
-  fatigueEl.textContent=`${Math.round(data.fatigue)}%`;
-  fatigueEl.className=`stat-chip-val ${data.fatigue>60?'red':data.fatigue>30?'yellow':'green'}`;
-  prodEl.textContent=`${Math.round(data.productivity)}%`;
-  prodEl.className=`stat-chip-val ${data.productivity>70?'green':data.productivity>40?'yellow':'red'}`;
-  document.getElementById('npc-card').classList.add('visible');
-  state.selectedNPC=data;
-  // pre-select in shop
-  document.getElementById('shop-npc-sel').value=data.id;
-}
-
-// ═══════════════════════════════════════════════
-// INTERACTION
-// ═══════════════════════════════════════════════
-function tryInteract(){
-  if(!state.isLocked) return;
-  raycaster.setFromCamera(center, camera);
-  const hits = raycaster.intersectObjects(npcMeshes, true);
-  if(hits.length>0){
-    let npcGrp=null;
-    for(const h of hits){
-      let obj=h.object;
-      while(obj.parent){
-        if(obj.userData?.isNPC){npcGrp=obj;break;}
-        obj=obj.parent;
-      }
-      if(npcGrp) break;
-    }
-    if(npcGrp){
-      const d=camera.position.distanceTo(npcGrp.position);
-      if(d<5){
-        const npc=npcGrp.userData.npcData;
-        showNPCCard(npc);
-        if(!state.scannerActive) toggleScanner();
-        return;
-      }
-    }
-  }
-}
-
-// Hint text
-function updateHint(){
-  if(!state.gameStarted) return;
-  raycaster.setFromCamera(center,camera);
-  const hits = raycaster.intersectObjects(npcMeshes,true);
-  const hintEl = document.getElementById('hint');
-  if(hits.length>0){
-    let npcGrp=null;
-    for(const h of hits){
-      let obj=h.object;
-      while(obj.parent){
-        if(obj.userData?.isNPC){npcGrp=obj;break;}
-        obj=obj.parent;
-      }
-      if(npcGrp) break;
-    }
-    if(npcGrp){
-      const d=camera.position.distanceTo(npcGrp.position);
-      if(d<5){
-        hintEl.textContent=`[E] Hablar con ${npcGrp.userData.npcData.name}`;
-        hintEl.classList.add('visible');
-        return;
-      }
-    }
-  }
-  hintEl.classList.remove('visible');
-}
-
-// ═══════════════════════════════════════════════
-// SHOP SYSTEM
-// ═══════════════════════════════════════════════
-function buildShopUI(){
-  const list = document.getElementById('shop-items-list');
-  const sel = document.getElementById('shop-npc-sel');
-  // Populate NPC dropdown
-  NPC_DATA.forEach(n=>{
-    const opt=document.createElement('option');
-    opt.value=n.id; opt.textContent=`${n.emoji} ${n.name} – ${n.role}`;
-    sel.appendChild(opt);
-  });
-
-  SHOP_ITEMS.forEach(item=>{
-    const el=document.createElement('div');
-    el.className='shop-item';
-    el.id=`shop-item-${item.id}`;
-    el.innerHTML=`
-      <div class="shop-item-header">
-        <div class="shop-item-icon">${item.icon}</div>
-        <div>
-          <div class="shop-item-name">${item.name}</div>
-          <div class="shop-item-desc">${item.desc}</div>
+      <section id="budget-panel" aria-live="polite">
+        <div class="hud-label">PRESUPUESTO</div>
+        <div class="hud-value" id="budget-val">5.000 €</div>
+        <div class="hud-sub">⭐ <span id="ergo-pts">0</span> ErgoPuntos</div>
+      </section>
+
+      <section id="prod-panel" aria-live="polite">
+        <div class="hud-label">PRODUCTIVIDAD</div>
+        <div class="hud-value" id="prod-val">54%</div>
+        <div class="prod-bar"><div class="prod-fill" id="prod-fill" style="width:54%"></div></div>
+      </section>
+
+      <div id="xhair"><div class="dot"></div></div>
+      <div id="hint"></div>
+
+      <div id="scanner-overlay">
+        <div class="scan-vignette"></div>
+        <div class="scan-grid"></div>
+        <div class="scan-corners"></div>
+        <div id="scanner-status">ESCÁNER: INACTIVO</div>
+        <div class="scanner-reticle">
+          <span></span><span></span><span></span><span></span>
         </div>
       </div>
-      <div class="shop-item-price">${item.price.toLocaleString('es')} €</div>
-      <div class="shop-item-effect">
-        ${item.tags.map(t=>`<span class="effect-tag">${t}</span>`).join('')}
-      </div>`;
-    el.addEventListener('click',()=>purchaseItem(item));
-    list.appendChild(el);
-  });
 
-  document.getElementById('shop-close').addEventListener('click', closeShop);
-  document.getElementById('shop').addEventListener('click', e=>{ if(e.target===document.getElementById('shop')) closeShop(); });
-}
+      <section id="diagnostic">
+        <div class="diag-title">ANÁLISIS POSTURAL</div>
+        <div class="diag-row">
+          <div class="diag-icon ok" id="d-neck-icon">--</div>
+          <div class="diag-label">Cuello</div>
+          <div class="diag-angle ok" id="d-neck-val">-</div>
+        </div>
+        <div class="diag-row">
+          <div class="diag-icon ok" id="d-back-icon">--</div>
+          <div class="diag-label">Columna</div>
+          <div class="diag-angle ok" id="d-back-val">-</div>
+        </div>
+        <div class="diag-row">
+          <div class="diag-icon ok" id="d-wrist-icon">--</div>
+          <div class="diag-label">Muñecas</div>
+          <div class="diag-angle ok" id="d-wrist-val">-</div>
+        </div>
+        <div class="diag-row">
+          <div class="diag-icon ok" id="d-hours-icon">--</div>
+          <div class="diag-label">Horas sentado</div>
+          <div class="diag-angle ok" id="d-hours-val">-</div>
+        </div>
+        <div class="diag-severity sev-none" id="d-severity">APUNTA A UN EMPLEADO</div>
+      </section>
 
-function toggleShop(){
-  if(state.shopOpen) closeShop();
-  else openShop();
-}
-function openShop(){
-  state.shopOpen=true;
-  document.getElementById('shop').classList.add('open');
-  if(state.isLocked) document.exitPointerLock();
-  refreshShopState();
-}
-function closeShop(){
-  state.shopOpen=false;
-  document.getElementById('shop').classList.remove('open');
-}
-function refreshShopState(){
-  SHOP_ITEMS.forEach(item=>{
-    const el=document.getElementById(`shop-item-${item.id}`);
-    if(el) el.classList.toggle('disabled', state.budget < item.price);
-  });
-}
+      <section id="npc-card">
+        <div class="npc-avatar" id="npc-avatar">ID</div>
+        <div class="npc-name" id="npc-name">-</div>
+        <div class="npc-role" id="npc-role">-</div>
+        <div class="npc-dialogue" id="npc-dialogue">...</div>
+        <div class="npc-stats">
+          <div class="stat-chip"><span class="stat-chip-label">Fatiga</span><span class="stat-chip-val red" id="npc-fatigue">-</span></div>
+          <div class="stat-chip"><span class="stat-chip-label">Productiv.</span><span class="stat-chip-val green" id="npc-productivity">-</span></div>
+        </div>
+      </section>
 
-function purchaseItem(item){
-  if(state.budget<item.price){
-    showNotif('Presupuesto insuficiente.','error');
-    return;
-  }
-  const targetId = document.getElementById('shop-npc-sel').value;
-  state.budget -= item.price;
-  state.totalPurchases++;
-  updateBudgetUI();
-  refreshShopState();
+      <div id="email-notif"></div>
+      <div id="notif-area"></div>
+      <div id="achievement-area"></div>
 
-  // Apply effects
-  if(targetId==='all'){
-    NPC_DATA.forEach(n=> applyEffectsToNPC(n, item.effects));
-  } else {
-    const npc=NPC_DATA.find(n=>n.id===targetId);
-    if(npc) applyEffectsToNPC(npc, item.effects);
-  }
+      <div id="minimap-wrap">
+        <div class="map-label">MAPA DE PLANTA</div>
+        <canvas id="minimap" width="160" height="160"></canvas>
+      </div>
 
-  updateProductivityUI();
-  showNotif(`✓ ${item.name} adquirido${targetId!=='all'?' para '+NPC_DATA.find(n=>n.id===targetId)?.name:''}!`,'success');
-  state.transformLevel = Math.min(100, state.transformLevel + 8);
-  updateTransformBar();
-  checkEmailTrigger('purchase', state.totalPurchases);
-  checkEmailTrigger('productivity', Math.round(state.productivity));
-  closeShop();
-}
+      <div id="uni-logo-hud">
+        <img src="/logo-universidad.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+        <div class="uni-text" style="display:none">UNIVERSIDAD</div>
+      </div>
 
-function applyEffectsToNPC(npc, effects){
-  if(effects.spine!==undefined) npc.posture.spine = Math.max(0, npc.posture.spine + effects.spine);
-  if(effects.neck!==undefined) npc.posture.neck = Math.max(0, npc.posture.neck + effects.neck);
-  if(effects.wrist!==undefined) npc.posture.wrist = Math.max(0, npc.posture.wrist + effects.wrist);
-  if(effects.fatigue!==undefined) npc.fatigue = Math.max(0, npc.fatigue + effects.fatigue);
-  if(effects.prod!==undefined) npc.productivity = Math.min(100, npc.productivity + effects.prod);
-  if(npc.fatigue<30 && npc.posture.spine<12 && npc.posture.neck<15) npc.healthy=true;
-  recalcProductivity();
-}
+      <div id="controls">
+        <span class="ctrl-key">WASD</span><span class="ctrl-desc">Mover</span>
+        <span class="ctrl-key">Q</span><span class="ctrl-desc">Escáner</span>
+        <span class="ctrl-key">E</span><span class="ctrl-desc">Hablar</span>
+        <span class="ctrl-key">B</span><span class="ctrl-desc">Tienda</span>
+        <span class="ctrl-key">R</span><span class="ctrl-desc">Ergonomía</span>
+        <span class="ctrl-key">T</span><span class="ctrl-desc">Stats</span>
+        <span class="ctrl-key">ESC</span><span class="ctrl-desc">Menú</span>
+      </div>
 
-function recalcProductivity(){
-  const avg = NPC_DATA.reduce((s,n)=>s+n.productivity,0)/NPC_DATA.length;
-  state.productivity = Math.round(avg);
-  updateProductivityUI();
-}
+      <div id="dpad">
+        <div class="dpad-row">
+          <button class="dpad-btn" id="btn-w" data-key="KeyW" type="button"><span class="dpad-arrow">▲</span><span class="dpad-label">W</span></button>
+        </div>
+        <div class="dpad-row">
+          <button class="dpad-btn" id="btn-a" data-key="KeyA" type="button"><span class="dpad-arrow">◀</span><span class="dpad-label">A</span></button>
+          <div class="dpad-center"></div>
+          <button class="dpad-btn" id="btn-d" data-key="KeyD" type="button"><span class="dpad-arrow">▶</span><span class="dpad-label">D</span></button>
+        </div>
+        <div class="dpad-row">
+          <button class="dpad-btn" id="btn-s" data-key="KeyS" type="button"><span class="dpad-arrow">▼</span><span class="dpad-label">S</span></button>
+        </div>
+        <div class="dpad-action-row">
+          <button class="dpad-action-btn" id="btn-q" data-key="KeyQ" type="button"><span>Q</span> Escáner</button>
+          <button class="dpad-action-btn" id="btn-e" data-key="KeyE" type="button"><span>E</span> Hablar</button>
+          <button class="dpad-action-btn" id="btn-b" data-key="KeyB" type="button"><span>B</span> Tienda</button>
+        </div>
+      </div>
+    </div>
 
-// ═══════════════════════════════════════════════
-// HUD UPDATES
-// ═══════════════════════════════════════════════
-function updateBudgetUI(){
-  document.getElementById('budget-val').textContent = `${state.budget.toLocaleString('es')} €`;
-}
-function updateProductivityUI(){
-  document.getElementById('prod-val').textContent = `${state.productivity}%`;
-  document.getElementById('prod-fill').style.width = `${state.productivity}%`;
-}
-function updateTransformBar(){
-  document.getElementById('transform-fill').style.width = `${state.transformLevel}%`;
-}
+    <div id="shop">
+      <div class="shop-panel">
+        <div class="shop-head">
+          <h2>🛒 TIENDA ERGONÓMICA</h2>
+          <button class="close-btn" id="shop-close" type="button">✕</button>
+        </div>
+        <div class="shop-npc-sel">
+          <label for="shop-npc-sel">DESTINAR A EMPLEADO</label>
+          <select id="shop-npc-sel">
+            <option value="all">Todos los empleados</option>
+          </select>
+        </div>
+        <div class="shop-items" id="shop-items-list"></div>
+      </div>
+    </div>
 
-// ═══════════════════════════════════════════════
-// NOTIFICATIONS
-// ═══════════════════════════════════════════════
-function showNotif(msg, type='success'){
-  const area=document.getElementById('notif-area');
-  const n=document.createElement('div');
-  n.className=`notif ${type}`;
-  n.textContent=msg;
-  area.appendChild(n);
-  setTimeout(()=>n.remove(), 4000);
-}
+    <div id="ergo-panel">
+      <button class="ergo-close-btn" id="ergo-close" type="button">✕ CERRAR [R]</button>
+      <div class="ergo-container">
+        <div class="ergo-header">
+          <h1>🏋️ GUÍA ERGONÓMICA PROFESIONAL</h1>
+          <p>BASADO EN NORMATIVAS OIT · ISO 9241 · MÉTODO REBA</p>
+        </div>
+        <div class="ergo-grid">
+          <article class="ergo-card">
+            <div class="ergo-card-icon">✅</div>
+            <h3>La postura correcta</h3>
+            <ul>
+              <li>Espalda recta con soporte lumbar activo.</li>
+              <li>Monitor al nivel de los ojos.</li>
+              <li>Codos a 90° o ligeramente abiertos.</li>
+              <li>Muñecas neutras al teclear.</li>
+              <li>Pies planos en el suelo o reposapiés.</li>
+            </ul>
+            <div class="ergo-angles">
+              <div class="angle-item"><div class="angle-num">0-15°</div><div class="angle-label">Cuello</div></div>
+              <div class="angle-item"><div class="angle-num">0-10°</div><div class="angle-label">Columna</div></div>
+              <div class="angle-item"><div class="angle-num">0-10°</div><div class="angle-label">Muñecas</div></div>
+              <div class="angle-item"><div class="angle-num">90°</div><div class="angle-label">Codos</div></div>
+            </div>
+          </article>
+          <article class="ergo-card">
+            <div class="ergo-card-icon">⚠️</div>
+            <h3>Riesgos de malas posturas</h3>
+            <ul>
+              <li>Lumbalgia crónica y bajas laborales.</li>
+              <li>Síndrome del túnel carpiano.</li>
+              <li>Tendinitis de hombros y codos.</li>
+              <li>Migrañas cervicogénicas.</li>
+              <li>Fatiga visual y mental.</li>
+            </ul>
+          </article>
+          <article class="ergo-card">
+            <div class="ergo-card-icon">🛠️</div>
+            <h3>Soluciones ergonómicas</h3>
+            <ul>
+              <li>Silla ergonómica con soporte lumbar.</li>
+              <li>Soporte de monitor a nivel ocular.</li>
+              <li>Reposamuñecas y teclado alineado.</li>
+              <li>Mesa elevable y pausas activas.</li>
+              <li>Iluminación LED sin reflejos.</li>
+            </ul>
+          </article>
+          <article class="ergo-card">
+            <div class="ergo-card-icon">📊</div>
+            <h3>Datos OIT y OMS</h3>
+            <div class="ergo-stats">
+              <div class="estat"><div class="estat-num">80%</div><div class="estat-desc">sufre dolor lumbar alguna vez.</div></div>
+              <div class="estat"><div class="estat-num">4:1</div><div class="estat-desc">retorno de inversión ergonómica.</div></div>
+              <div class="estat"><div class="estat-num">40%</div><div class="estat-desc">menos fatiga con pausas activas.</div></div>
+            </div>
+          </article>
+          <article class="ergo-card full">
+            <div class="ergo-card-icon">📋</div>
+            <h3>Checklist postural diario</h3>
+            <div class="ergo-checklist">
+              <div class="check-item"><input type="checkbox" id="c1" /><label for="c1">¿Tu silla tiene soporte lumbar?</label></div>
+              <div class="check-item"><input type="checkbox" id="c2" /><label for="c2">¿Tus pies tocan el suelo?</label></div>
+              <div class="check-item"><input type="checkbox" id="c3" /><label for="c3">¿El monitor está a la altura de tus ojos?</label></div>
+              <div class="check-item"><input type="checkbox" id="c4" /><label for="c4">¿Tus muñecas están rectas?</label></div>
+              <div class="check-item"><input type="checkbox" id="c5" /><label for="c5">¿Tu espalda está apoyada?</label></div>
+              <div class="check-item"><input type="checkbox" id="c6" /><label for="c6">¿Hiciste una pausa activa?</label></div>
+            </div>
+          </article>
+          <article class="ergo-card full">
+            <div class="ergo-card-icon">⌚</div>
+            <h3>Pausas activas cada 2 horas</h3>
+            <div class="exercise-grid">
+              <div class="exercise"><div class="exercise-icon">🔄</div><h4>Rotación cervical</h4><p>Gira la cabeza lentamente. 10 repeticiones.</p></div>
+              <div class="exercise"><div class="exercise-icon">🤸</div><h4>Hombros</h4><p>Entrelaza dedos y estira brazos 20 segundos.</p></div>
+              <div class="exercise"><div class="exercise-icon">✊</div><h4>Muñecas</h4><p>Abre y cierra puños. 15 repeticiones.</p></div>
+              <div class="exercise"><div class="exercise-icon">🧘</div><h4>Respiración</h4><p>Inhala 4s, mantén 2s, exhala 6s.</p></div>
+              <div class="exercise"><div class="exercise-icon">🦵</div><h4>Piernas</h4><p>Eleva rodillas alternadamente 20 veces.</p></div>
+              <div class="exercise"><div class="exercise-icon">👁️</div><h4>20-20-20</h4><p>Mira a 6m durante 20 segundos.</p></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
 
-// ═══════════════════════════════════════════════
-// EMAIL SYSTEM
-// ═══════════════════════════════════════════════
-let triggeredEmails=new Set();
-function checkEmailTrigger(type, val){
-  EMAILS_DATA.forEach(e=>{
-    if(triggeredEmails.has(e.id)) return;
-    let trigger=false;
-    if(e.triggerType==='immediate') trigger=true;
-    else if(e.triggerType===type){
-      if(typeof e.triggerVal==='number') trigger = val>=e.triggerVal;
-      else trigger = val===e.triggerVal;
-    }
-    if(trigger){ triggeredEmails.add(e.id); showEmailNotif(e); }
-  });
-}
+    <div id="stats-panel">
+      <div class="stats-container">
+        <button class="stats-close" id="stats-close" type="button">✕ CERRAR [T]</button>
+        <div class="stats-header">
+          <h2>📊 ESTADÍSTICAS DE MISIÓN</h2>
+          <p>INFORME EN TIEMPO REAL</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="sval" id="st-time">00:00</div><div class="slabel">Tiempo jugado</div></div>
+          <div class="stat-card"><div class="sval" id="st-scanned">0/5</div><div class="slabel">NPCs escaneados</div></div>
+          <div class="stat-card"><div class="sval" id="st-spent">0 €</div><div class="slabel">Total invertido</div></div>
+          <div class="stat-card"><div class="sval" id="st-pts">0</div><div class="slabel">ErgoPuntos</div></div>
+        </div>
+        <div class="stats-section">
+          <div class="hud-label">ESTADO DE EMPLEADOS</div>
+          <div class="npc-status-list" id="npc-status-list"></div>
+        </div>
+        <div class="stats-section">
+          <div class="hud-label">LOGROS DESBLOQUEADOS</div>
+          <div class="achievement-list" id="achievement-list"></div>
+        </div>
+      </div>
+    </div>
 
-function showEmailNotif(email){
-  const area=document.getElementById('email-notif');
-  const t=document.createElement('div');
-  t.className='email-toast';
-  const cat={urgent:'🚨',warning:'⚠️',positive:'🎉',report:'📊',update:'📋'}[email.category]||'✉️';
-  t.innerHTML=`<div class="email-icon">${cat}</div><div class="email-content"><strong>NUEVO CORREO</strong>${email.subject}</div>`;
-  area.appendChild(t);
-  setTimeout(()=>t.remove(),5000);
-  if(email.category==='positive' && email.triggerType==='productivity'){
-    // Extra budget reward
-    const bonus=500;
-    state.budget+=bonus;
-    updateBudgetUI();
-    setTimeout(()=>showNotif(`💰 Bonus CEO: +${bonus}€ añadidos al presupuesto!`,'success'),600);
-  }
-}
+    <div id="tutorial">
+      <div class="tutorial-box">
+        <div class="tutorial-icon">🔍</div>
+        <h2>BIENVENIDO, INSPECTOR</h2>
+        <p>Eres un consultor ergonómico contratado para salvar la empresa. Diagnostica empleados, compra soluciones y eleva la productividad al 100%.</p>
+        <div class="tut-keys">
+          <div class="tut-key"><span class="key">WASD</span><p>Desplazarte por la oficina</p></div>
+          <div class="tut-key"><span class="key">MOUSE</span><p>Girar la cámara</p></div>
+          <div class="tut-key"><span class="key">Q</span><p>Activar escáner postural</p></div>
+          <div class="tut-key"><span class="key">E</span><p>Hablar con empleados</p></div>
+          <div class="tut-key"><span class="key">B</span><p>Abrir tienda ergonómica</p></div>
+          <div class="tut-key"><span class="key">R</span><p>Guía ergonómica</p></div>
+        </div>
+        <button class="tut-btn" id="tut-start" type="button">¡COMENZAR INSPECCIÓN!</button>
+        <button class="tut-no-show" id="tut-no-show" type="button">No volver a mostrar este tutorial</button>
+      </div>
+    </div>
 
-// ═══════════════════════════════════════════════
-// NPC ANIMATION
-// ═══════════════════════════════════════════════
-function animateNPCs(t){
-  npcMeshes.forEach((grp,i)=>{
-    const data=grp.userData.npcData;
-    // Idle breathing sway
-    const breathe=Math.sin(t*1.2+i*1.3)*0.006;
-    grp.position.y = breathe;
+    <div id="confetti-container"></div>
+    <div id="victory-flash"></div>
 
-    // Head subtle movement
-    const head=grp.children.find(c=>c.userData?.bodyPart==='head');
-    if(head){
-      head.rotation.y = Math.sin(t*0.4+i*0.8)*0.05;
-      head.rotation.x = Math.sin(t*0.3+i*0.5)*0.02;
-    }
-
-    // Typing animation (arm bob)
-    if(!data.healthy){
-      const lArm=grp.children.find(c=>c.userData?.bodyPart==='arm_left');
-      const rArm=grp.children.find(c=>c.userData?.bodyPart==='arm_right');
-      if(lArm) lArm.rotation.x = Math.sin(t*4+i)*0.03;
-      if(rArm) rArm.rotation.x = Math.sin(t*4+i+Math.PI)*0.03;
-    }
-
-    // Pain ring pulse
-    const ring=grp.children.find(c=>c.userData?.isPainRing);
-    if(ring){
-      ring.position.y=ring.userData.baseY+Math.sin(t*2+i)*0.04;
-      ring.material.opacity=0.5+Math.sin(t*3+i)*0.3;
-      ring.rotation.z=t*0.5;
-    }
-
-    // Label always faces camera
-    const label=grp.children.find(c=>c.userData?.isLabel);
-    if(label){
-      const worldPos=new THREE.Vector3();
-      grp.getWorldPosition(worldPos);
-      label.lookAt(camera.position.x-grp.position.x+grp.position.x,
-        camera.position.y,
-        camera.position.z-grp.position.z+grp.position.z);
-    }
-  });
-}
-
-// ═══════════════════════════════════════════════
-// PASSIVE INCOME TIMER
-// ═══════════════════════════════════════════════
-let lastIncome=0;
-function updateIncome(t){
-  if(!state.gameStarted) return;
-  if(t-lastIncome>30){
-    lastIncome=t;
-    const inc = Math.round(200 + (state.productivity/100)*300);
-    state.budget += inc;
-    updateBudgetUI();
-    refreshShopState();
-    showNotif(`💰 Ingresos recibidos: +${inc}€`,'success');
-    state.transformLevel = Math.min(100, state.transformLevel + (state.productivity/100)*3);
-    updateTransformBar();
-    checkEmailTrigger('productivity', state.productivity);
-  }
-}
-
-// Passive fatigue increase
-let lastFatigue=0;
-function updateFatigue(t){
-  if(!state.gameStarted) return;
-  if(t-lastFatigue>15){
-    lastFatigue=t;
-    NPC_DATA.forEach(n=>{
-      if(!n.healthy){
-        n.fatigue=Math.min(100, n.fatigue+3);
-        n.productivity=Math.max(5, n.productivity-2);
-        n.seatedHours+=0.25;
-      }
-    });
-    recalcProductivity();
-  }
-}
-
-// ═══════════════════════════════════════════════
-// LOADING SIMULATION + START
-// ═══════════════════════════════════════════════
-const loadBar = document.getElementById('load-bar');
-const loadText = document.getElementById('load-text');
-const startBtn = document.getElementById('start-btn');
-const msgs=['CARGANDO MODELOS 3D...','INICIALIZANDO SISTEMAS...','CARGANDO DATOS POSTURALES...','PREPARANDO ESCÁNER...','¡LISTO!'];
-let loadStep=0;
-const loadInterval=setInterval(()=>{
-  loadStep++;
-  const pct = Math.min(loadStep*22, 100);
-  loadBar.style.width=`${pct}%`;
-  loadText.textContent = msgs[Math.min(loadStep-1,msgs.length-1)];
-  if(pct>=100){
-    clearInterval(loadInterval);
-    startBtn.style.display='block';
-  }
-},400);
-
-startBtn.addEventListener('click',()=>{
-  document.getElementById('splash').classList.add('hidden');
-  setTimeout(()=>{
-    document.getElementById('splash').style.display='none';
-    document.getElementById('click-overlay').classList.remove('hidden');
-    state.gameStarted=true;
-    updateBudgetUI();
-    updateProductivityUI();
-    checkEmailTrigger('immediate',0);
-    showNotif('¡Misión iniciada! Usa Q para activar el escáner postural.','success');
-  },1200);
-});
-
-// ═══════════════════════════════════════════════
-// MAIN LOOP
-// ═══════════════════════════════════════════════
-function animate(){
-  requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(), 0.04);
-  const t=clock.getElapsedTime();
-  updatePlayer(dt);
-  updateScanner();
-  updateHint();
-  animateNPCs(t);
-  updateIncome(t);
-  updateFatigue(t);
-  renderer.render(scene, camera);
-}
-
-window.addEventListener('resize',()=>{
-  camera.aspect=window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-buildShopUI();
-animate();
-
-// ══════════════════════════════════════════════════════
-// D-PAD — on-screen movement buttons
-// ══════════════════════════════════════════════════════
-(function setupDpad(){
-  const dpad = document.getElementById('dpad');
-
-  // Show D-pad once game starts
-  const origStart = document.getElementById('start-btn');
-  origStart.addEventListener('click', ()=>{
-    setTimeout(()=>{ dpad.classList.add('visible'); }, 1400);
-  });
-
-  // Map each button to its keyboard code
-  const btns = dpad.querySelectorAll('[data-key]');
-
-  btns.forEach(btn=>{
-    const code = btn.dataset.key;
-
-    const press = (e)=>{
-      e.preventDefault();
-      // For movement keys: simulate keydown
-      if(['KeyW','KeyA','KeyS','KeyD'].includes(code)){
-        if(!keys[code]){
-          keys[code] = true;
-          btn.classList.add('pressed');
-        }
-      } else {
-        // For action keys: fire once (keydown event equivalent)
-        btn.classList.add('pressed');
-        const ev = new KeyboardEvent('keydown',{code, bubbles:true});
-        document.dispatchEvent(ev);
-        setTimeout(()=>btn.classList.remove('pressed'), 180);
-      }
-    };
-
-    const release = (e)=>{
-      e.preventDefault();
-      if(['KeyW','KeyA','KeyS','KeyD'].includes(code)){
-        keys[code] = false;
-        btn.classList.remove('pressed');
-      }
-    };
-
-    // Mouse events
-    btn.addEventListener('mousedown', press);
-    btn.addEventListener('mouseup', release);
-    btn.addEventListener('mouseleave', release);
-
-    // Touch events (mobile)
-    btn.addEventListener('touchstart', press, {passive:false});
-    btn.addEventListener('touchend', release, {passive:false});
-    btn.addEventListener('touchcancel', release, {passive:false});
-  });
-})();
-</script>
-</body>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>

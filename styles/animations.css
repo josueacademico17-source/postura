@@ -1,0 +1,257 @@
+@keyframes pulse-status {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.48;
+  }
+}
+
+@keyframes blink-bad {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.43;
+  }
+}
+
+@keyframes scan-sweep {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(760%);
+  }
+}
+
+@keyframes reticle-rotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes notifIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes notifOut {
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+#email-notif {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.email-toast {
+  display: flex;
+  max-width: 390px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border: 1px solid rgba(0, 212, 200, 0.3);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: #fff;
+  font-size: 12px;
+  animation: slideDown 0.35s ease, fadeOut 0.35s ease 4.6s forwards;
+}
+
+.email-icon {
+  flex-shrink: 0;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.email-content strong {
+  display: block;
+  color: var(--cyan);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+#notif-area {
+  position: absolute;
+  right: 18px;
+  bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.notif {
+  max-width: 300px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--cyan);
+  border-radius: 8px;
+  background: rgba(5, 13, 20, 0.94);
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 12px;
+  line-height: 1.5;
+  animation: notifIn 0.3s ease, notifOut 0.3s ease 3.7s forwards;
+}
+
+.notif.success,
+.notif.info {
+  border-left-color: var(--cyan);
+}
+
+.notif.error {
+  border-left-color: var(--red);
+}
+
+.notif.warning {
+  border-left-color: var(--amber);
+}
+
+#achievement-area {
+  position: absolute;
+  top: 90px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.achievement-popup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 22px;
+  border: 1px solid rgba(255, 190, 0, 0.4);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(5, 13, 20, 0.97), rgba(10, 22, 40, 0.97));
+  box-shadow: 0 0 30px rgba(255, 190, 0, 0.2);
+  animation: achieveIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), achieveOut 0.4s ease 4.5s forwards;
+}
+
+.achieve-icon {
+  font-size: 32px;
+  filter: drop-shadow(0 0 8px rgba(255, 190, 0, 0.6));
+}
+
+.achieve-title {
+  color: rgba(255, 190, 0, 0.9);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.achieve-name {
+  margin-top: 2px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.achieve-desc {
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+}
+
+@keyframes achieveIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes achieveOut {
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+}
+
+#confetti-container {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 10px;
+  opacity: 0.85;
+  animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(110vh) rotate(720deg);
+  }
+}
+
+#victory-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 940;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+#victory-flash.flash {
+  opacity: 0.7;
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "first_scan",
+    "icon": "🔍",
+    "name": "Primer Diagnostico",
+    "description": "Escanear el primer empleado",
+    "trigger": "scan",
+    "target": 1,
+    "points": 10
+  },
+  {
+    "id": "all_scanned",
+    "icon": "🌟",
+    "name": "Inspector Total",
+    "description": "Escanear a los 5 empleados",
+    "trigger": "scan",
+    "target": 5,
+    "points": 50
+  },
+  {
+    "id": "first_buy",
+    "icon": "🛒",
+    "name": "Primera Compra",
+    "description": "Adquirir el primer item ergonomico",
+    "trigger": "purchase",
+    "target": 1,
+    "points": 25
+  },
+  {
+    "id": "five_buys",
+    "icon": "🏪",
+    "name": "Comprador Experto",
+    "description": "Realizar 5 compras",
+    "trigger": "purchase",
+    "target": 5,
+    "points": 75
+  },
+  {
+    "id": "hero_back",
+    "icon": "💪",
+    "name": "Heroe de la Espalda",
+    "description": "Mejorar a 2 empleados",
+    "trigger": "healthyWorkers",
+    "target": 2,
+    "points": 100
+  },
+  {
+    "id": "budget_100",
+    "icon": "💰",
+    "name": "Inversor Eficiente",
+    "description": "Gastar mas de 1000 EUR",
+    "trigger": "spent",
+    "target": 1000,
+    "points": 50
+  },
+  {
+    "id": "puntos_500",
+    "icon": "⭐",
+    "name": "ErgoPuntos Experto",
+    "description": "Acumular 500 ErgoPuntos",
+    "trigger": "ergopoints",
+    "target": 500,
+    "points": 100
+  },
+  {
+    "id": "ergo_total",
+    "icon": "🏆",
+    "name": "Ergonomia Total",
+    "description": "Alcanzar 100% de productividad",
+    "trigger": "productivity",
+    "target": 100,
+    "points": 200
+  }
+]
