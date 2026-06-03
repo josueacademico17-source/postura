@@ -260,12 +260,49 @@ canvas{display:block;width:100vw;height:100vh}
   <div id="notif-area"></div>
 
   <!-- Controls legend -->
+  <!-- Controls legend -->
   <div id="controls">
-    <span class="ctrl-key">WASD</span><span class="ctrl-desc">Mover</span>
+    <span class="ctrl-key">W</span><span class="ctrl-desc">Frente</span>
+    <span class="ctrl-key">A</span><span class="ctrl-desc">Izq.</span>
+    <span class="ctrl-key">S</span><span class="ctrl-desc">Atrás</span>
+    <span class="ctrl-key">D</span><span class="ctrl-desc">Der.</span>
     <span class="ctrl-key">Q</span><span class="ctrl-desc">Escáner</span>
-    <span class="ctrl-key">E</span><span class="ctrl-desc">Interactuar</span>
+    <span class="ctrl-key">E</span><span class="ctrl-desc">Hablar</span>
     <span class="ctrl-key">B</span><span class="ctrl-desc">Tienda</span>
-    <span class="ctrl-key">ESC</span><span class="ctrl-desc">Menú</span>
+    <span class="ctrl-key">R</span><span class="ctrl-desc">Ergonomía</span>
+    <span class="ctrl-key">T</span><span class="ctrl-desc">Stats</span>
+  </div>
+
+  <!-- D-Pad visual (bottom-left) -->
+  <div id="dpad">
+    <div class="dpad-row">
+      <div class="dpad-btn" id="btn-w" data-key="KeyW">
+        <div class="dpad-arrow">&#9650;</div>
+        <div class="dpad-label">W &middot; FRENTE</div>
+      </div>
+    </div>
+    <div class="dpad-row">
+      <div class="dpad-btn" id="btn-a" data-key="KeyA">
+        <div class="dpad-arrow">&#9664;</div>
+        <div class="dpad-label">A &middot; IZQ.</div>
+      </div>
+      <div class="dpad-center"></div>
+      <div class="dpad-btn" id="btn-d" data-key="KeyD">
+        <div class="dpad-arrow">&#9654;</div>
+        <div class="dpad-label">D &middot; DER.</div>
+      </div>
+    </div>
+    <div class="dpad-row">
+      <div class="dpad-btn" id="btn-s" data-key="KeyS">
+        <div class="dpad-arrow">&#9660;</div>
+        <div class="dpad-label">S &middot; ATRÁS</div>
+      </div>
+    </div>
+    <div class="dpad-action-row">
+      <div class="dpad-action-btn" id="btn-q" data-key="KeyQ"><span>Q</span> Escáner</div>
+      <div class="dpad-action-btn" id="btn-e" data-key="KeyE"><span>E</span> Hablar</div>
+      <div class="dpad-action-btn" id="btn-b" data-key="KeyB"><span>B</span> Tienda</div>
+    </div>
   </div>
 </div>
 
@@ -1399,6 +1436,61 @@ window.addEventListener('resize',()=>{
 
 buildShopUI();
 animate();
+
+// ══════════════════════════════════════════════════════
+// D-PAD — on-screen movement buttons
+// ══════════════════════════════════════════════════════
+(function setupDpad(){
+  const dpad = document.getElementById('dpad');
+
+  // Show D-pad once game starts
+  const origStart = document.getElementById('start-btn');
+  origStart.addEventListener('click', ()=>{
+    setTimeout(()=>{ dpad.classList.add('visible'); }, 1400);
+  });
+
+  // Map each button to its keyboard code
+  const btns = dpad.querySelectorAll('[data-key]');
+
+  btns.forEach(btn=>{
+    const code = btn.dataset.key;
+
+    const press = (e)=>{
+      e.preventDefault();
+      // For movement keys: simulate keydown
+      if(['KeyW','KeyA','KeyS','KeyD'].includes(code)){
+        if(!keys[code]){
+          keys[code] = true;
+          btn.classList.add('pressed');
+        }
+      } else {
+        // For action keys: fire once (keydown event equivalent)
+        btn.classList.add('pressed');
+        const ev = new KeyboardEvent('keydown',{code, bubbles:true});
+        document.dispatchEvent(ev);
+        setTimeout(()=>btn.classList.remove('pressed'), 180);
+      }
+    };
+
+    const release = (e)=>{
+      e.preventDefault();
+      if(['KeyW','KeyA','KeyS','KeyD'].includes(code)){
+        keys[code] = false;
+        btn.classList.remove('pressed');
+      }
+    };
+
+    // Mouse events
+    btn.addEventListener('mousedown', press);
+    btn.addEventListener('mouseup', release);
+    btn.addEventListener('mouseleave', release);
+
+    // Touch events (mobile)
+    btn.addEventListener('touchstart', press, {passive:false});
+    btn.addEventListener('touchend', release, {passive:false});
+    btn.addEventListener('touchcancel', release, {passive:false});
+  });
+})();
 </script>
 </body>
 </html>
