@@ -1424,11 +1424,13 @@ document.addEventListener('keydown', e=>{
 });
 document.addEventListener('keyup', e=>{ keys[e.code]=false; });
 
-canvas.addEventListener('click',()=>{
+function tryLock(){
   if(!state.gameStarted) return;
-  if(!state.isLocked) canvas.requestPointerLock();
-  SoundManager.resume();
-});
+  if(!state.isLocked){ canvas.requestPointerLock(); SoundManager.resume(); }
+}
+canvas.addEventListener('click', tryLock);
+// The overlay sits on top of the canvas: attach same handler so clicking it also locks
+document.getElementById('click-overlay').addEventListener('click', tryLock);
 
 document.addEventListener('pointerlockchange',()=>{
   state.isLocked=(document.pointerLockElement===canvas);
@@ -1983,6 +1985,7 @@ function closeTutorial(){
 document.getElementById('tut-no-show').addEventListener('click',()=>{
   try{ localStorage.setItem('ip_tutorial_done','1'); }catch(e){}
   closeTutorial();
+  document.getElementById('click-overlay').classList.remove('hidden');
 });
 
 // ══════════════════════════════════════════════════════
