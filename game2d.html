@@ -1011,7 +1011,7 @@ function drawFurniture(){
     ctx.fillStyle='#7a4e2d';
     ctx.beginPath(); ctx.ellipse(sx,sy+8,12,8,0,0,Math.PI*2); ctx.fill();
     // Leaves
-    [[0,-18,12],[−8,-12,9],[8,-12,9]].forEach(([lx,ly,lr])=>{
+    [[0,-18,12],[-8,-12,9],[8,-12,9]].forEach(([lx,ly,lr])=>{
       ctx.fillStyle='#2d7a3d';
       ctx.beginPath(); ctx.arc(sx+lx,sy+ly,lr,0,Math.PI*2); ctx.fill();
     });
